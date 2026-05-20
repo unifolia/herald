@@ -1,12 +1,12 @@
-# MIDI Messenger
+# MIDI Herald
 
-MIDI Messenger is a control station for your MIDI-equipped guitar pedals. Pick a device, nudge some sliders, fire a program change, and save the whole setup as a preset for next time. 🎸
+MIDI Herald is a control station for your MIDI-equipped guitar pedals. Pick a device, nudge some sliders, fire a program change, and save the whole setup as a preset for next time. 🎸
 
 At its core, the app is built around blocks: small modules that _do a thing_.
 Blocks can send CC messages, which are often used to change individual
 parameters or settings, or PC messages, which are usually used for more 'advanced' things like saving and recalling presets. 🕺
 
-## Use the MIDI Messenger to:
+## Use the MIDI Herald to:
 
 - Send CC and PC messages to your favorite MIDI gear. 📞
 - Customize the label and background color of each block. 🌈
@@ -17,7 +17,7 @@ parameters or settings, or PC messages, which are usually used for more 'advance
 ## Quick Start
 
 1. Connect a MIDI device.
-2. Start MIDI Messenger and choose a device from the **MIDI Device** menu.
+2. Start MIDI Herald and choose a device from the **MIDI Device** menu.
 3. Add CC or PC blocks as needed.
 4. Set each block's MIDI channel and CC/program number.
 5. Move CC sliders or click **Send** on a PC block.

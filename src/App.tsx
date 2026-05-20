@@ -287,7 +287,7 @@ const App = () => {
 
   return (
     <main>
-      <Title>Messenger</Title>
+      <Title>Herald</Title>
 
       {isMidiOutput ? (
         <Device device={device} deviceList={deviceList} setDevice={setDevice} />
@@ -359,7 +359,7 @@ const App = () => {
         })}
       </FormsContainer>
       <footer>
-        <FooterText><a id="mothership" href="https://midi.engineering">𐙦 MIDI Engineering</a> | <a href="https://github.com/unifolia/midi-messenger">Documentation</a></FooterText>
+        <FooterText><a id="mothership" href="https://midi.engineering">𐙦 MIDI Engineering</a> | <a href="https://github.com/unifolia/midi-herald">Documentation</a></FooterText>
       </footer>
     </main>
   );
