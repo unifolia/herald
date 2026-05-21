@@ -32,7 +32,7 @@ class ErrorBoundary extends Component<Props, State> {
             justifyContent: "center",
             minHeight: "60vh",
             gap: theme.spacing.lg,
-            color: theme.colors.textPrimary,
+            color: "var(--text-primary)",
             fontFamily: theme.fonts.family,
           }}
         >
@@ -47,7 +47,7 @@ class ErrorBoundary extends Component<Props, State> {
           </h2>
           <p
             style={{
-              color: theme.colors.textSecondary,
+              color: "var(--text-secondary)",
               fontSize: theme.fonts.sizes.body,
               margin: 0,
             }}
@@ -58,14 +58,14 @@ class ErrorBoundary extends Component<Props, State> {
             onClick={() => this.setState({ hasError: false })}
             style={{
               borderRadius: theme.borderRadius.md,
-              border: `1px solid ${theme.colors.surfaceGlassBorder}`,
+              border: "1px solid var(--surface-glass-border)",
               padding: "0.8rem 1.5rem",
               fontSize: theme.fonts.sizes.body,
               fontWeight: theme.fonts.weights.normal,
               fontFamily: "inherit",
-              color: theme.colors.textPrimary,
+              color: "var(--text-primary)",
               cursor: "pointer",
-              background: theme.colors.surfaceInput,
+              background: "var(--surface-input)",
               textTransform: "lowercase",
               letterSpacing: "0.02em",
             }}

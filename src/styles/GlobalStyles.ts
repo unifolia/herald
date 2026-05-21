@@ -1,21 +1,58 @@
 import styled, { createGlobalStyle } from "styled-components";
 import { theme } from "./theme";
+import type { ColorScheme } from "../types";
 
-export const GlobalStyles = createGlobalStyle`
+const schemeVariables = (
+  scheme: (typeof theme.colorSchemes)[keyof typeof theme.colorSchemes],
+) => `
+  color-scheme: ${scheme.colorScheme};
+  --primary: ${scheme.colors.primary};
+  --primary-light: ${scheme.colors.primaryLight};
+  --primary-muted: ${scheme.colors.primaryMuted};
+  --surface-dark: ${scheme.colors.surfaceDark};
+  --surface-glass: ${scheme.colors.surfaceGlass};
+  --surface-glass-border: ${scheme.colors.surfaceGlassBorder};
+  --surface-subtle: ${scheme.colors.surfaceSubtle};
+  --surface-input: ${scheme.colors.surfaceInput};
+  --surface-popover: ${scheme.colors.surfacePopover};
+  --surface-hover: ${scheme.colors.surfaceHover};
+  --surface-hover-strong: ${scheme.colors.surfaceHoverStrong};
+  --text-primary: ${scheme.colors.textPrimary};
+  --text-secondary: ${scheme.colors.textSecondary};
+  --danger: ${scheme.colors.danger};
+  --danger-alpha-10: ${scheme.colors.dangerAlpha10};
+  --danger-alpha-30: ${scheme.colors.dangerAlpha30};
+  --background: ${scheme.colors.background};
+  --primary-alpha-5: ${scheme.colors.primaryAlpha5};
+  --primary-alpha-8: ${scheme.colors.primaryAlpha8};
+  --primary-alpha-20: ${scheme.colors.primaryAlpha20};
+  --primary-alpha-30: ${scheme.colors.primaryAlpha30};
+  --inset-highlight: ${scheme.colors.insetHighlight};
+  --inset-highlight-strong: ${scheme.colors.insetHighlightStrong};
+  --range-track: ${scheme.gradients.rangeTrack};
+  --range-thumb: ${scheme.gradients.rangeThumb};
+  --text-gradient: ${scheme.gradients.textGradient};
+  --shadow-glass: ${scheme.shadows.glass};
+  --shadow-glass-hover: ${scheme.shadows.glassHover};
+  --shadow-button: ${scheme.shadows.button};
+  --shadow-text-glow: ${scheme.shadows.textGlow};
+  --shadow-range-thumb: ${scheme.shadows.rangeThumb};
+  --shadow-range-thumb-hover: ${scheme.shadows.rangeThumbHover};
+  --shadow-nav: ${scheme.shadows.nav};
+  --select-caret: ${scheme.selectCaret};
+`;
+
+interface GlobalStyleProps {
+  $colorScheme: ColorScheme;
+}
+
+export const GlobalStyles = createGlobalStyle<GlobalStyleProps>`
   :root {
+    ${({ $colorScheme }) => schemeVariables(theme.colorSchemes[$colorScheme])}
     line-height: 1.4;
     font-weight: 300;
-    color-scheme: dark;
-    color: ${theme.colors.textPrimary};
-
-    --primary: ${theme.colors.primary};
-    --primary-light: ${theme.colors.primaryLight};
-    --primary-muted: ${theme.colors.primaryMuted};
-    --surface-glass: ${theme.colors.surfaceGlass};
-    --surface-glass-border: ${theme.colors.surfaceGlassBorder};
-    --text-primary: ${theme.colors.textPrimary};
-    --text-secondary: ${theme.colors.textSecondary};
-    --danger: ${theme.colors.danger};
+    color: var(--text-primary);
+    accent-color: var(--primary);
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -24,7 +61,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   body {
-    background: ${theme.colors.background};
+    background: var(--background);
     margin: 0;
     display: flex;
     place-items: center;
@@ -59,7 +96,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   footer {
-    margin-top: auto;
+    margin-top: 25px;
   }
 
   a,
@@ -68,7 +105,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   #mothership {
-    color: white;
+    color: var(--text-primary);
     text-decoration: none;
   }
 `;
@@ -80,15 +117,15 @@ export const Title = styled.h1`
   text-transform: lowercase;
   font-weight: ${theme.fonts.weights.thin};
   letter-spacing: 0.05em;
-  background: ${theme.gradients.textGradient};
+  background: var(--text-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: ${theme.shadows.textGlow};
+  text-shadow: var(--shadow-text-glow);
   margin: 0 0 ${theme.spacing.xl} 0;
 
   &::selection {
-    background: ${theme.colors.primaryAlpha30};
+    background: var(--primary-alpha-30);
     color: var(--text-primary);
     -webkit-text-fill-color: var(--text-primary);
   }
@@ -109,12 +146,12 @@ export const BaseButton = styled.button`
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(10px);
-  background: ${theme.colors.surfaceInput};
+  background: var(--surface-input);
 
   &:hover {
     border-color: var(--primary);
-    background: ${theme.colors.primaryAlpha8};
-    box-shadow: ${theme.shadows.button};
+    background: var(--surface-hover-strong);
+    box-shadow: var(--shadow-button);
     color: var(--text-primary);
   }
 `;

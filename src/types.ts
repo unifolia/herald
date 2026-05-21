@@ -16,3 +16,4 @@ export interface MidiPCFormData {
 }
 
 export type Layout = "tile" | "row";
+export type ColorScheme = "dark" | "light";

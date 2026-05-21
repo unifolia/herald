@@ -2,56 +2,111 @@ import { useState, useCallback, useRef, useMemo } from "react";
 import MidiCCForm from "./lib/MidiCCForm";
 import MidiPCForm from "./lib/MidiPCForm";
 import Header from "./lib/Header";
-import { FormsContainer, FooterText } from "./styles/components";
-import { Title } from "./styles/GlobalStyles";
+import ErrorBoundary from "./lib/ErrorBoundary";
+import {
+  FormsContainer,
+  FooterText,
+  ThemeToggleButton,
+} from "./styles/components";
+import { GlobalStyles, Title } from "./styles/GlobalStyles";
 import Navigation from "./lib/NavBar";
 import Device from "./lib/Device";
 import useMIDI from "./hooks/useMIDI";
 import useDragReorder from "./hooks/useDragReorder";
 import { parsePreset } from "./util/presetIo";
-import type { MidiCCFormData, MidiPCFormData, Layout } from "./types";
+import type {
+  MidiCCFormData,
+  MidiPCFormData,
+  Layout,
+  ColorScheme,
+} from "./types";
 
-const DEFAULT_BG = "#909090";
+const DARK_DEFAULT_BG = "#516f57";
+const LIGHT_DEFAULT_BG = "#ffb349";
 const MAX_BLOCKS = 75;
+const INITIAL_CC_ID = 1;
+const INITIAL_PC_ID = -1;
+const THEME_STORAGE_KEY = "midi-herald-color-scheme";
 
-const INITIAL_CC: MidiCCFormData[] = [
+const isColorScheme = (value: string | null): value is ColorScheme =>
+  value === "dark" || value === "light";
+
+const getSystemColorScheme = (): ColorScheme => {
+  if (typeof window === "undefined" || !window.matchMedia) {
+    return "dark";
+  }
+
+  return window.matchMedia("(prefers-color-scheme: light)").matches
+    ? "light"
+    : "dark";
+};
+
+const getInitialColorScheme = (): ColorScheme => {
+  if (typeof window === "undefined") {
+    return "dark";
+  }
+
+  try {
+    const storedScheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (isColorScheme(storedScheme)) {
+      return storedScheme;
+    }
+  } catch {
+    // Ignore storage access errors and fall back to the system preference.
+  }
+
+  return getSystemColorScheme();
+};
+
+const getDefaultBackgroundColor = (colorScheme: ColorScheme) =>
+  colorScheme === "light" ? LIGHT_DEFAULT_BG : DARK_DEFAULT_BG;
+
+const createInitialCC = (backgroundColor: string): MidiCCFormData[] => [
   {
-    id: 1,
+    id: INITIAL_CC_ID,
     midiChannel: 1,
     midiCC: 1,
     value: 64,
     label: "MIDI Control Block",
-    backgroundColor: DEFAULT_BG,
+    backgroundColor,
   },
 ];
 
-const INITIAL_PC: MidiPCFormData[] = [
+const createInitialPC = (backgroundColor: string): MidiPCFormData[] => [
   {
-    id: -1,
+    id: INITIAL_PC_ID,
     midiChannel: 1,
     program: 0,
     label: "Program Change",
-    backgroundColor: DEFAULT_BG,
+    backgroundColor,
   },
 ];
 
 const App = () => {
+  const [colorScheme, setColorScheme] = useState<ColorScheme>(
+    getInitialColorScheme,
+  );
+  const [initialBackgroundColor] = useState(() =>
+    getDefaultBackgroundColor(colorScheme),
+  );
   const [layout, setLayout] = useState<Layout>("tile");
-  const [forms, setForms] = useState({
+  const [forms, setForms] = useState(() => ({
     name: "Untitled Preset",
-    inputs: INITIAL_CC,
-  });
-  const nextIdRef = useRef(Math.max(...INITIAL_CC.map((f) => f.id), 0) + 1);
+    inputs: createInitialCC(initialBackgroundColor),
+  }));
+  const nextIdRef = useRef(INITIAL_CC_ID + 1);
   const [globalMidiChannel, setGlobalMidiChannel] = useState<number | null>(
     null,
   );
 
-  const [pcForms, setPcForms] = useState<MidiPCFormData[]>(INITIAL_PC);
-  const nextPcIdRef = useRef(Math.min(...INITIAL_PC.map((f) => f.id), 0) - 1);
+  const [pcForms, setPcForms] = useState<MidiPCFormData[]>(() =>
+    createInitialPC(initialBackgroundColor),
+  );
+  const nextPcIdRef = useRef(INITIAL_PC_ID - 1);
 
   const [formOrder, setFormOrder] = useState<number[]>([
-    ...INITIAL_CC.map((f) => f.id),
-    ...INITIAL_PC.map((f) => f.id),
+    INITIAL_CC_ID,
+    INITIAL_PC_ID,
   ]);
   const blockCount = forms.inputs.length + pcForms.length;
 
@@ -73,6 +128,20 @@ const App = () => {
     () => setLayout((l) => (l === "tile" ? "row" : "tile")),
     [],
   );
+
+  const toggleColorScheme = useCallback(() => {
+    setColorScheme((currentScheme) => {
+      const nextScheme = currentScheme === "light" ? "dark" : "light";
+
+      try {
+        window.localStorage.setItem(THEME_STORAGE_KEY, nextScheme);
+      } catch {
+        // Ignore storage access errors; the in-memory toggle still works.
+      }
+
+      return nextScheme;
+    });
+  }, []);
 
   const allItems = useMemo(() => formOrder.map((id) => ({ id })), [formOrder]);
 
@@ -132,7 +201,7 @@ const App = () => {
       const entry = allFormsById.get(formOrder[i]);
       if (entry) return entry.data.backgroundColor;
     }
-    return DEFAULT_BG;
+    return initialBackgroundColor;
   };
 
   const handleAddCCInput = () => {
@@ -286,82 +355,111 @@ const App = () => {
   );
 
   return (
-    <main>
-      <Title>Herald</Title>
+    <>
+      <GlobalStyles $colorScheme={colorScheme} />
+      <ErrorBoundary>
+        <main>
+          <Title>Herald</Title>
 
-      {isMidiOutput ? (
-        <Device device={device} deviceList={deviceList} setDevice={setDevice} />
-      ) : (
-        <h2>No MIDI Devices Connected</h2>
-      )}
-
-      <Navigation
-        handleAddCCInput={handleAddCCInput}
-        handleAddPCInput={handleAddPCInput}
-        savePreset={savePreset}
-        handleLoadPreset={handleLoadPreset}
-        globalMidiChannel={globalMidiChannel}
-        handleGlobalMidiChannelChange={handleGlobalMidiChannelChange}
-        layout={layout}
-        onToggleLayout={toggleLayout}
-      />
-
-      <Header
-        name={forms.name}
-        setName={(value: string) =>
-          setForms((prev) => ({ ...prev, name: value }))
-        }
-      />
-
-      <FormsContainer ref={containerRef} $layout={layout}>
-        {orderedIds.map((id) => {
-          const item = allFormsById.get(id);
-          if (!item) return null;
-          if (item.type === "cc") {
-            const form = item.data;
-            return (
-              <MidiCCForm
-                key={form.id}
-                id={form.id}
-                onRemove={handleRemoveCCForm}
-                updateCCFormField={updateCCFormField}
-                midiChannel={form.midiChannel}
-                midiCC={form.midiCC}
-                value={form.value}
-                label={form.label}
-                backgroundColor={form.backgroundColor}
-                sendCC={sendCC}
-                dragRef={registerRef(form.id)}
-                onDragPointerDown={handlePointerDown}
-                isDragging={draggedId === form.id}
-                layout={layout}
-              />
-            );
-          }
-          const pc = item.data;
-          return (
-            <MidiPCForm
-              key={pc.id}
-              id={pc.id}
-              onRemove={handleRemovePCForm}
-              updatePCFormField={updatePCFormField}
-              midiChannel={pc.midiChannel}
-              program={pc.program}
-              label={pc.label}
-              backgroundColor={pc.backgroundColor}
-              sendPC={sendPC}
-              dragRef={registerRef(pc.id)}
-              onDragPointerDown={handlePointerDown}
-              isDragging={draggedId === pc.id}
-              layout={layout}
+          {isMidiOutput ? (
+            <Device
+              device={device}
+              deviceList={deviceList}
+              setDevice={setDevice}
             />
-          );
-        })}
-      </FormsContainer>
-      <footer>
-        <FooterText><a id="mothership" href="https://midi.engineering">𐙦 MIDI Engineering</a> | <a href="https://github.com/unifolia/midi-herald">Documentation</a></FooterText>
-      </footer>
-    </main>
+          ) : (
+            <h2>No MIDI Devices Connected</h2>
+          )}
+
+          <Navigation
+            handleAddCCInput={handleAddCCInput}
+            handleAddPCInput={handleAddPCInput}
+            savePreset={savePreset}
+            handleLoadPreset={handleLoadPreset}
+            globalMidiChannel={globalMidiChannel}
+            handleGlobalMidiChannelChange={handleGlobalMidiChannelChange}
+            layout={layout}
+            onToggleLayout={toggleLayout}
+          />
+
+          <Header
+            name={forms.name}
+            setName={(value: string) =>
+              setForms((prev) => ({ ...prev, name: value }))
+            }
+          />
+
+          <FormsContainer ref={containerRef} $layout={layout}>
+            {orderedIds.map((id) => {
+              const item = allFormsById.get(id);
+              if (!item) return null;
+              if (item.type === "cc") {
+                const form = item.data;
+                return (
+                  <MidiCCForm
+                    key={form.id}
+                    id={form.id}
+                    onRemove={handleRemoveCCForm}
+                    updateCCFormField={updateCCFormField}
+                    midiChannel={form.midiChannel}
+                    midiCC={form.midiCC}
+                    value={form.value}
+                    label={form.label}
+                    backgroundColor={form.backgroundColor}
+                    sendCC={sendCC}
+                    dragRef={registerRef(form.id)}
+                    onDragPointerDown={handlePointerDown}
+                    isDragging={draggedId === form.id}
+                    layout={layout}
+                  />
+                );
+              }
+              const pc = item.data;
+              return (
+                <MidiPCForm
+                  key={pc.id}
+                  id={pc.id}
+                  onRemove={handleRemovePCForm}
+                  updatePCFormField={updatePCFormField}
+                  midiChannel={pc.midiChannel}
+                  program={pc.program}
+                  label={pc.label}
+                  backgroundColor={pc.backgroundColor}
+                  sendPC={sendPC}
+                  dragRef={registerRef(pc.id)}
+                  onDragPointerDown={handlePointerDown}
+                  isDragging={draggedId === pc.id}
+                  layout={layout}
+                />
+              );
+            })}
+          </FormsContainer>
+          <footer>
+            <FooterText>
+              <a href="https://github.com/unifolia/midi-herald">
+                documentation
+              </a>
+              {/* <span aria-hidden="true" data-separator /> */}
+              <ThemeToggleButton
+                type="button"
+                onClick={toggleColorScheme}
+                aria-pressed={colorScheme === "light"}
+                aria-label={`Theme: ${colorScheme}. Click to switch to ${
+                  colorScheme === "light" ? "dark" : "light"
+                }.`}
+              >
+                theme: {colorScheme}
+              </ThemeToggleButton>
+            </FooterText>
+            <FooterText>
+              <a id="mothership" href="https://midi.engineering">
+                𐙦 MIDI Engineering
+              </a>
+            </FooterText>
+          </footer>
+        </main>
+      </ErrorBoundary>
+    </>
   );
 };
 
