@@ -35,7 +35,7 @@ const lightColors: typeof darkColors = {
   primaryLight: "#b98a24",
   primaryMuted: "#294f77",
 
-  background: "#eadbb8",
+  background: "#f9f0dd",
   surfaceDark: "#fff7e2",
   surfaceGlass: "rgba(255, 247, 224, 0.74)",
   surfaceGlassBorder: "rgba(125, 82, 38, 0.28)",
