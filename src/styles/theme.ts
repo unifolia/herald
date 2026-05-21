@@ -64,7 +64,7 @@ const lightColors: typeof darkColors = {
 
 const darkGradients = {
   rangeTrack:
-    "linear-gradient(270deg, rgba(143, 29, 44, 0.34), rgba(216, 164, 66, 0.34), rgba(47, 95, 127, 0.34))",
+    "linear-gradient(270deg, rgba(255, 131, 147, 0.66), rgba(240, 201, 127, 0.66), rgba(161, 217, 255, 0.66))",
   rangeThumb: "linear-gradient(135deg, var(--primary), var(--primary-light))",
   textGradient:
     "linear-gradient(135deg, var(--primary), var(--primary-light), var(--primary-muted))",
@@ -72,7 +72,7 @@ const darkGradients = {
 
 const lightGradients: typeof darkGradients = {
   rangeTrack:
-    "linear-gradient(270deg, rgba(169, 54, 36, 0.34), rgba(185, 138, 36, 0.34), rgba(41, 79, 119, 0.34))",
+    "linear-gradient(270deg, rgba(169, 54, 36, 0.66), rgba(185, 138, 36, 0.66), rgba(41, 79, 119, 0.66))",
   rangeThumb: darkGradients.rangeThumb,
   textGradient: darkGradients.textGradient,
 };
