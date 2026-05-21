@@ -2,6 +2,7 @@ const darkColors = {
   primary: "#ff8d28",
   primaryLight: "#d8a442",
   primaryMuted: "#2f5f7f",
+  secondary: "#d63f78",
 
   background: "#151211",
   surfaceDark: "#24180f",
@@ -34,6 +35,7 @@ const lightColors: typeof darkColors = {
   primary: "#a93624",
   primaryLight: "#b98a24",
   primaryMuted: "#294f77",
+  secondary: "#3fd662",
 
   background: "#f9f0dd",
   surfaceDark: "#fff7e2",
@@ -67,14 +69,15 @@ const darkGradients = {
     "linear-gradient(270deg, rgba(255, 131, 147, 0.66), rgba(240, 201, 127, 0.66), rgba(161, 217, 255, 0.66))",
   rangeThumb: "linear-gradient(135deg, var(--primary), var(--primary-light))",
   textGradient:
-    "linear-gradient(135deg, var(--primary), var(--primary-light), var(--primary-muted))",
+    "linear-gradient(135deg, var(--secondary), var(--primary-light), var(--primary-muted))",
 };
 
 const lightGradients: typeof darkGradients = {
   rangeTrack:
     "linear-gradient(270deg, rgba(169, 54, 36, 0.66), rgba(185, 138, 36, 0.66), rgba(41, 79, 119, 0.66))",
   rangeThumb: darkGradients.rangeThumb,
-  textGradient: darkGradients.textGradient,
+  textGradient:
+    "linear-gradient(135deg, var(--primary), var(--primary-light), var(--primary-muted))",
 };
 
 const darkShadows = {
@@ -126,7 +129,7 @@ export const theme = {
     family:
       '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
     sizes: {
-      h1: "5.5em",
+      h1: "6em",
       h2: "2rem",
       form: "1rem",
       body: "0.95rem",

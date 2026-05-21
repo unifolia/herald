@@ -40,6 +40,7 @@ const schemeVariables = (
   --shadow-range-thumb-hover: ${scheme.shadows.rangeThumbHover};
   --shadow-nav: ${scheme.shadows.nav};
   --select-caret: ${scheme.selectCaret};
+  --secondary: ${scheme.colors.secondary};
 `;
 
 interface GlobalStyleProps {
@@ -122,7 +123,8 @@ export const Title = styled.h1`
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: var(--shadow-text-glow);
-  margin: 0 0 ${theme.spacing.xl} 0;
+  width: fit-content;
+  margin: 0 auto ${theme.spacing.md};
 
   &::selection {
     background: var(--primary-alpha-30);
