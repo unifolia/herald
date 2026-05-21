@@ -1,0 +1,19 @@
+{
+  "id": "/herald/",
+  "name": "Herald",
+  "short_name": "Herald",
+  "description": "A web MIDI controller and preset editor for guitar pedals and MIDI gear.",
+  "start_url": "/herald/",
+  "scope": "/herald/",
+  "display": "standalone",
+  "background_color": "#312519",
+  "theme_color": "#312519",
+  "categories": ["music", "utilities"],
+  "icons": [
+    {
+      "src": "/herald/old-map.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

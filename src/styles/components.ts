@@ -89,7 +89,7 @@ export const NavBar = styled.nav`
   backdrop-filter: blur(20px);
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.lg};
-  box-shadow: ${theme.shadows.nav};
+  box-shadow: var(--shadow-nav);
 
   @media (max-width: ${theme.breakpoints.rowStack}) {
     display: grid;
@@ -138,6 +138,13 @@ export const LayoutButton = styled(NavButton)`
   }
 `;
 
+export const ThemeToggleButton = styled(BaseButton)`
+  min-width: 72px;
+  padding: 0.4rem ${theme.spacing.sm};
+  font-size: ${theme.fonts.sizes.label};
+  background: var(--surface-glass);
+`;
+
 // Form Components
 export const FormsContainer = styled.div<{ $layout?: Layout }>`
   ${({ $layout }) =>
@@ -183,14 +190,14 @@ export const MidiFormContainer = styled.div`
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.xl};
   padding: ${theme.spacing.lg};
-  box-shadow: ${theme.shadows.glass};
+  box-shadow: var(--shadow-glass);
   position: relative;
   display: flex;
   flex-direction: column;
 
   &:hover {
-    box-shadow: ${theme.shadows.glassHover};
-    border-color: ${theme.colors.primaryAlpha30};
+    box-shadow: var(--shadow-glass-hover);
+    border-color: var(--primary-alpha-30);
   }
 
   ${rowWideSelf(css`
@@ -248,13 +255,13 @@ export const FormTitleDisplay = styled.h3`
   cursor: pointer;
   border-radius: ${theme.borderRadius.md};
   transition: ${theme.transitions.default};
-  background: ${theme.colors.surfaceSubtle};
+  background: var(--surface-subtle);
   border: 1px solid transparent;
   box-sizing: border-box;
   text-align: center;
 
   &:hover {
-    background: ${theme.colors.primaryAlpha5};
+    background: var(--primary-alpha-5);
     border-color: var(--surface-glass-border);
     color: var(--primary);
   }
@@ -292,7 +299,7 @@ export const FormTitleInput = styled.input`
   font-weight: ${theme.fonts.weights.normal};
   font-family: inherit;
   color: var(--text-primary);
-  background: ${theme.colors.primaryAlpha8};
+  background: var(--primary-alpha-8);
   border: 1px solid var(--primary);
   border-radius: ${theme.borderRadius.md};
   outline: none;
@@ -320,7 +327,7 @@ export const RemoveButton = styled.button`
   min-width: 32px;
   padding: 0;
   position: relative;
-  background: ${theme.colors.surfaceSubtle};
+  background: var(--surface-subtle);
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.md};
   cursor: pointer;
@@ -349,8 +356,8 @@ export const RemoveButton = styled.button`
   }
 
   &:hover {
-    background: ${theme.colors.dangerAlpha10};
-    border-color: ${theme.colors.dangerAlpha30};
+    background: var(--danger-alpha-10);
+    border-color: var(--danger-alpha-30);
 
     &::before,
     &::after {
@@ -501,12 +508,12 @@ export const ColorPopover = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${theme.spacing.sm};
-  background: ${theme.colors.background};
+  background: var(--surface-popover);
   backdrop-filter: blur(20px);
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.lg};
   padding: ${theme.spacing.md};
-  box-shadow: ${theme.shadows.glass};
+  box-shadow: var(--shadow-glass);
 
   .react-colorful {
     width: 200px;
@@ -538,7 +545,7 @@ export const HexInput = styled(HexColorInput)`
   text-align: center;
   text-transform: uppercase;
   color: var(--text-primary);
-  background: ${theme.colors.surfaceInput};
+  background: var(--surface-input);
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.md};
   outline: none;
@@ -550,7 +557,7 @@ export const HexInput = styled(HexColorInput)`
 
   &:focus {
     border-color: var(--primary);
-    background: ${theme.colors.primaryAlpha8};
+    background: var(--primary-alpha-8);
   }
 `;
 
@@ -577,8 +584,8 @@ export const FormLabel = styled.label`
 export const Select = styled.select`
   -webkit-appearance: none;
   appearance: none;
-  background-color: ${theme.colors.surfaceInput};
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23e4e4e4' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-color: var(--surface-input);
+  background-image: var(--select-caret);
   background-repeat: no-repeat;
   background-position: right ${theme.spacing.sm} center;
   border: 1px solid var(--surface-glass-border);
@@ -593,17 +600,17 @@ export const Select = styled.select`
 
   &:hover {
     border-color: var(--primary);
-    background-color: ${theme.colors.primaryAlpha5};
+    background-color: var(--surface-hover);
   }
 
   &:focus {
     outline: none;
     border-color: var(--primary);
-    background-color: ${theme.colors.primaryAlpha8};
+    background-color: var(--primary-alpha-8);
   }
 
   option {
-    background: ${theme.colors.surfaceDark};
+    background: var(--surface-dark);
     color: var(--text-primary);
     padding: ${theme.spacing.xs};
   }
@@ -624,7 +631,7 @@ export const RangeInput = styled.input`
   appearance: none;
   width: 100%;
   height: 6px;
-  background: ${theme.gradients.rangeTrack};
+  background: var(--range-track);
   border-radius: 3px;
   outline: none;
   cursor: pointer;
@@ -635,31 +642,31 @@ export const RangeInput = styled.input`
     appearance: none;
     width: 20px;
     height: 20px;
-    background: ${theme.gradients.rangeThumb};
+    background: var(--range-thumb);
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: ${theme.shadows.rangeThumb};
+    box-shadow: var(--shadow-range-thumb);
     transition: ${theme.transitions.fast};
 
     &:hover {
       transform: scale(1.1);
-      box-shadow: ${theme.shadows.rangeThumbHover};
+      box-shadow: var(--shadow-range-thumb-hover);
     }
   }
 
   &::-moz-range-thumb {
     width: 20px;
     height: 20px;
-    background: ${theme.gradients.rangeThumb};
+    background: var(--range-thumb);
     border-radius: 50%;
     cursor: pointer;
     border: none;
-    box-shadow: ${theme.shadows.rangeThumb};
+    box-shadow: var(--shadow-range-thumb);
     transition: ${theme.transitions.fast};
 
     &:hover {
       transform: scale(1.1);
-      box-shadow: ${theme.shadows.rangeThumbHover};
+      box-shadow: var(--shadow-range-thumb-hover);
     }
   }
 `;
@@ -723,7 +730,7 @@ export const SendButton = styled(BaseButton)`
   @keyframes send-pulse {
     0% {
       transform: scale(1);
-      box-shadow: 0 0 0 0 ${theme.colors.primaryAlpha30};
+      box-shadow: 0 0 0 0 var(--primary-alpha-30);
     }
     40% {
       transform: scale(1.06);
@@ -749,6 +756,11 @@ export const DeviceHeading = styled.h2`
 `;
 
 export const FooterText = styled.p`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: ${theme.spacing.sm};
   font-size: 1.25rem;
 `;
 

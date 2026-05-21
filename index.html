@@ -1,16 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/src/assets/guitar-pedal.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Herald</title>
     <meta
       name="description"
-      content="An online, universal web editor for sending MIDI to guitar pedals"
+      content="Herald is a web MIDI controller for guitar pedals and MIDI gear. Send CC and program change messages, customize control blocks, and save presets."
     />
-    <meta name="keywords" content="MIDI, guitar, pedal, editor" />
     <meta name="author" content="james@jameslewis.io" />
-    <title>Messenger</title>
+    <meta name="application-name" content="Herald" />
+    <meta name="robots" content="index,follow" />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#312519"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#eadbb8"
+    />
+
+    <link rel="canonical" href="https://midi.engineering/herald/" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="%BASE_URL%old-map.png"
+    />
+    <link rel="apple-touch-icon" href="%BASE_URL%old-map.png" />
+    <link rel="manifest" href="%BASE_URL%site.webmanifest" />
+
+    <meta property="og:title" content="Herald - Web MIDI Controller" />
+    <meta
+      property="og:description"
+      content="Send MIDI CC and program change messages from the browser, organize control blocks, and save reusable presets for guitar pedals and MIDI gear."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://midi.engineering/herald/" />
+    <meta property="og:site_name" content="MIDI Engineering" />
+    <meta
+      property="og:image"
+      content="https://midi.engineering/herald/old-map.png"
+    />
+    <meta
+      property="og:image:secure_url"
+      content="https://midi.engineering/herald/old-map.png"
+    />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="Herald web MIDI controller icon" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Herald - Web MIDI Controller" />
+    <meta
+      name="twitter:description"
+      content="A browser-based MIDI controller and preset editor for guitar pedals and MIDI gear."
+    />
+    <meta
+      name="twitter:image"
+      content="https://midi.engineering/herald/old-map.png"
+    />
+    <meta name="twitter:image:alt" content="Herald web MIDI controller icon" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Herald",
+        "url": "https://midi.engineering/herald/",
+        "description": "A web MIDI controller and preset editor for guitar pedals and MIDI gear.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any Web MIDI-capable browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "MIDI Engineering",
+          "url": "https://midi.engineering/"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>

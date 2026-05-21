@@ -86,3 +86,72 @@ export const parsePreset = (
     },
   };
 };
+
+export const savePresetFile = async (preset: ParsedPreset) => {
+  const dataStr = JSON.stringify(
+    {
+      ...preset,
+      timestamp: new Date().toISOString(),
+    },
+    null,
+    2,
+  );
+  const dataBlob = new Blob([dataStr], { type: "application/json" });
+  const suggestedName = preset.name.replace(/[^a-z0-9]/gi, "_");
+
+  if ("showSaveFilePicker" in window) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: `${suggestedName}.json`,
+      });
+      const writable = await handle.createWritable();
+      await writable.write(dataBlob);
+      await writable.close();
+    } catch (error) {
+      if ((error as DOMException).name !== "AbortError") {
+        console.error("Save failed:", error);
+      }
+    }
+    return;
+  }
+
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${suggestedName}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+export const readPresetFile = (
+  file: File,
+  maxBlocks: number,
+): Promise<ParsePresetResult> =>
+  new Promise((resolve) => {
+    const reader = new FileReader();
+
+    reader.onload = (event: ProgressEvent<FileReader>) => {
+      const text = event.target?.result;
+      resolve(parsePreset(typeof text === "string" ? text : "", maxBlocks));
+    };
+
+    reader.onerror = () => resolve({ ok: false, error: "invalid" });
+    reader.onabort = () => resolve({ ok: false, error: "invalid" });
+    reader.readAsText(file);
+  });
+
+export const getPresetLoadErrorMessage = (
+  result: Extract<ParsePresetResult, { ok: false }>,
+) => {
+  if (result.error === "empty") {
+    return "No valid blocks found in preset file";
+  }
+
+  if (result.error === "too-many") {
+    return `Preset files can include up to ${result.max} blocks`;
+  }
+
+  return "Invalid preset file";
+};

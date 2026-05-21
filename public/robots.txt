@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://midi.engineering/herald/sitemap.xml
