@@ -126,7 +126,7 @@ export const theme = {
     family:
       '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
     sizes: {
-      h1: "4em",
+      h1: "5.5em",
       h2: "2rem",
       form: "1rem",
       body: "0.95rem",
