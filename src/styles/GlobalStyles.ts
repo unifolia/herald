@@ -65,7 +65,7 @@ export const GlobalStyles = createGlobalStyle<GlobalStyleProps>`
     margin: 0;
     display: flex;
     place-items: center;
-    min-width: 400px;
+    min-width: 380px;
     min-height: 100vh;
     font-family: ${theme.fonts.family};
     overflow-x: hidden;
@@ -101,7 +101,7 @@ export const GlobalStyles = createGlobalStyle<GlobalStyleProps>`
 
   a,
   a:visited {
-    color: var(--primary-light);
+    color: var(--text-primary);
   }
 
   #mothership {

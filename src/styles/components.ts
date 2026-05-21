@@ -762,16 +762,6 @@ export const FooterText = styled.p`
   flex-wrap: wrap;
   gap: ${theme.spacing.sm};
   font-size: 1.25rem;
-
-  [data-separator] {
-    font-size: 2rem;
-    width: 0.28em;
-    height: 0.28em;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0.72;
-    flex: 0 0 auto;
-  }
 `;
 
 export const SelectRow = styled.div`

@@ -3,7 +3,7 @@ const darkColors = {
   primaryLight: "#d8a442",
   primaryMuted: "#2f5f7f",
 
-  background: "#15100c",
+  background: "#151211",
   surfaceDark: "#24180f",
   surfaceGlass: "rgba(92, 61, 33, 0.28)",
   surfaceGlassBorder: "rgba(216, 164, 66, 0.28)",
