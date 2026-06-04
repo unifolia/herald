@@ -22,6 +22,8 @@ const schemeVariables = (
   --danger: ${scheme.colors.danger};
   --danger-alpha-10: ${scheme.colors.dangerAlpha10};
   --danger-alpha-30: ${scheme.colors.dangerAlpha30};
+  --title-hover: ${scheme.colors.titleHover};
+  --remove-hover: ${scheme.colors.removeHover};
   --background: ${scheme.colors.background};
   --primary-alpha-5: ${scheme.colors.primaryAlpha5};
   --primary-alpha-8: ${scheme.colors.primaryAlpha8};

@@ -40,7 +40,6 @@ const App = () => {
     forms,
     pcForms,
     formOrder,
-    globalMidiChannel,
     allItems,
     allFormsById,
     handleIncomingCC,
@@ -51,7 +50,6 @@ const App = () => {
     updateCCFormField,
     updatePCFormField,
     handleReorder,
-    handleGlobalMidiChannelChange,
     setPresetName,
     setPresetState,
   } = usePresetBlocks(initialBackgroundColor, MAX_BLOCKS);
@@ -87,9 +85,8 @@ const App = () => {
         inputs: forms.inputs,
         pcForms,
         formOrder,
-        globalMidiChannel,
       }),
-    [formOrder, forms.inputs, forms.name, globalMidiChannel, pcForms],
+    [formOrder, forms.inputs, forms.name, pcForms],
   );
 
   const handleLoadPreset = useCallback(
@@ -130,8 +127,6 @@ const App = () => {
             handleAddPCInput={handleAddPCInput}
             savePreset={savePreset}
             handleLoadPreset={handleLoadPreset}
-            globalMidiChannel={globalMidiChannel}
-            handleGlobalMidiChannelChange={handleGlobalMidiChannelChange}
             layout={layout}
             onToggleLayout={toggleLayout}
           />

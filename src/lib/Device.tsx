@@ -1,5 +1,5 @@
 import {
-  GlobalChannelSelect,
+  DeviceSelect,
   DeviceContainer,
   DeviceHeading,
 } from "../styles/components";
@@ -14,7 +14,7 @@ const Device = ({ device, deviceList, setDevice }: DeviceProps) => {
   return (
     <DeviceContainer>
       <DeviceHeading id="device-heading">MIDI Device:</DeviceHeading>
-      <GlobalChannelSelect
+      <DeviceSelect
         id="midi-device"
         aria-labelledby="device-heading"
         value={device}
@@ -26,7 +26,7 @@ const Device = ({ device, deviceList, setDevice }: DeviceProps) => {
             {d}
           </option>
         ))}
-      </GlobalChannelSelect>
+      </DeviceSelect>
     </DeviceContainer>
   );
 };

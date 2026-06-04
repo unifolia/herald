@@ -26,6 +26,9 @@ const darkColors = {
   dangerAlpha10: "rgba(196, 73, 45, 0.1)",
   dangerAlpha30: "rgba(196, 73, 45, 0.3)",
 
+  titleHover: "#ff8d28", // editable-title hover ink (= primary)
+  removeHover: "#c4492d", // remove-X hover ink (= danger)
+
   black: "#070503",
   insetHighlight: "rgba(243, 231, 197, 0.1)",
   insetHighlightStrong: "rgba(243, 231, 197, 0.15)",
@@ -41,14 +44,14 @@ const lightColors: typeof darkColors = {
   surfaceDark: "#fff7e2",
   surfaceGlass: "rgba(255, 247, 224, 0.74)",
   surfaceGlassBorder: "rgba(125, 82, 38, 0.28)",
-  surfaceSubtle: "rgba(41, 79, 119, 0.08)",
+  surfaceSubtle: "rgba(255, 250, 235, 0.5)",
   surfaceInput: "rgba(255, 250, 235, 0.8)",
   surfacePopover: "rgba(255, 248, 229, 0.98)",
   surfaceHover: "rgba(252, 242, 216, 0.86)",
   surfaceHoverStrong: "rgba(249, 235, 203, 0.88)",
 
   primaryAlpha5: "rgba(169, 54, 36, 0.06)",
-  primaryAlpha8: "rgba(169, 54, 36, 0.1)",
+  primaryAlpha8: "rgba(255, 240, 230, 0.7)",
   primaryAlpha20: "rgba(169, 54, 36, 0.2)",
   primaryAlpha30: "rgba(169, 54, 36, 0.32)",
 
@@ -58,6 +61,9 @@ const lightColors: typeof darkColors = {
   danger: "#8f2f24",
   dangerAlpha10: "rgba(143, 47, 36, 0.1)",
   dangerAlpha30: "rgba(143, 47, 36, 0.3)",
+
+  titleHover: "#17120b", // editable-title hover ink (= near-black)
+  removeHover: "#17120b", // remove-X hover ink (= near-black)
 
   black: "#17120b",
   insetHighlight: "rgba(255, 255, 245, 0.48)",
@@ -162,7 +168,7 @@ export const theme = {
   shadows: darkShadows,
   breakpoints: {
     narrow: "700px",
-    rowStack: "1100px",
+    rowStack: "1040px",
     big: "1440px",
     huge: "1900px",
   },

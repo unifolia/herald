@@ -5,7 +5,6 @@ export interface ParsedPreset {
   inputs: MidiCCFormData[];
   pcForms: MidiPCFormData[];
   formOrder: number[];
-  globalMidiChannel: number | null;
 }
 
 export type ParsePresetResult =
@@ -79,10 +78,6 @@ export const parsePreset = (
       inputs,
       pcForms,
       formOrder,
-      globalMidiChannel:
-        typeof preset.globalMidiChannel === "number"
-          ? preset.globalMidiChannel
-          : null,
     },
   };
 };

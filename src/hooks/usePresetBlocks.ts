@@ -42,9 +42,6 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     INITIAL_CC_ID,
     INITIAL_PC_ID,
   ]);
-  const [globalMidiChannel, setGlobalMidiChannel] = useState<number | null>(
-    null,
-  );
   const nextIdRef = useRef(INITIAL_CC_ID + 1);
   const nextPcIdRef = useRef(INITIAL_PC_ID - 1);
 
@@ -92,52 +89,40 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     );
   }, []);
 
-  const handleGlobalMidiChannelChange = useCallback(
-    (newGlobalChannel: number) => {
-      setGlobalMidiChannel(newGlobalChannel);
-      setForms((prev) => ({
-        ...prev,
-        inputs: prev.inputs.map((form) => ({
-          ...form,
-          midiChannel: newGlobalChannel,
-        })),
-      }));
-      setPcForms((prev) =>
-        prev.map((pc) => ({ ...pc, midiChannel: newGlobalChannel })),
-      );
-    },
-    [],
-  );
-
-  const getLastBackgroundColor = useCallback(() => {
+  const getInheritedBlockDefaults = useCallback(() => {
     for (let i = formOrder.length - 1; i >= 0; i--) {
       const entry = allFormsById.get(formOrder[i]);
-      if (entry) return entry.data.backgroundColor;
+      if (entry) {
+        return {
+          backgroundColor: entry.data.backgroundColor,
+          midiChannel: entry.data.midiChannel,
+        };
+      }
     }
-    return initialBackgroundColor;
+    return { backgroundColor: initialBackgroundColor, midiChannel: 1 };
   }, [allFormsById, formOrder, initialBackgroundColor]);
 
   const handleAddCCInput = useCallback(() => {
     if (blockCount >= maxBlocks) return;
 
     const id = nextIdRef.current++;
-    const lastColor = getLastBackgroundColor();
+    const { backgroundColor, midiChannel } = getInheritedBlockDefaults();
     setForms((prev) => ({
       ...prev,
       inputs: [
         ...prev.inputs,
         {
           id,
-          midiChannel: globalMidiChannel ?? 1,
+          midiChannel,
           midiCC: 1,
           value: 64,
           label: "MIDI Control Block",
-          backgroundColor: lastColor,
+          backgroundColor,
         },
       ],
     }));
     setFormOrder((prev) => [...prev, id]);
-  }, [blockCount, getLastBackgroundColor, globalMidiChannel, maxBlocks]);
+  }, [blockCount, getInheritedBlockDefaults, maxBlocks]);
 
   const handleRemoveCCForm = useCallback((id: number) => {
     setForms((prev) => ({
@@ -151,19 +136,19 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     if (blockCount >= maxBlocks) return;
 
     const id = nextPcIdRef.current--;
-    const lastColor = getLastBackgroundColor();
+    const { backgroundColor, midiChannel } = getInheritedBlockDefaults();
     setPcForms((prev) => [
       ...prev,
       {
         id,
-        midiChannel: globalMidiChannel || 1,
+        midiChannel,
         program: 0,
         label: "Program Change",
-        backgroundColor: lastColor,
+        backgroundColor,
       },
     ]);
     setFormOrder((prev) => [...prev, id]);
-  }, [blockCount, getLastBackgroundColor, globalMidiChannel, maxBlocks]);
+  }, [blockCount, getInheritedBlockDefaults, maxBlocks]);
 
   const handleRemovePCForm = useCallback((id: number) => {
     setPcForms((prev) => prev.filter((pc) => pc.id !== id));
@@ -204,14 +189,12 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     nextPcIdRef.current =
       Math.min(...preset.pcForms.map((form) => form.id), 0) - 1;
     setFormOrder(preset.formOrder);
-    setGlobalMidiChannel(preset.globalMidiChannel);
   }, []);
 
   return {
     forms,
     pcForms,
     formOrder,
-    globalMidiChannel,
     blockCount,
     allItems,
     allFormsById,
@@ -223,7 +206,6 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     updateCCFormField,
     updatePCFormField,
     handleReorder,
-    handleGlobalMidiChannelChange,
     setPresetName,
     setPresetState,
   };

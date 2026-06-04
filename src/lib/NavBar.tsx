@@ -2,9 +2,6 @@ import {
   NavBar,
   NavButton,
   LoadButton,
-  GlobalChannelContainer,
-  GlobalChannelLabel,
-  GlobalChannelSelect,
   LayoutButton,
 } from "../styles/components";
 import type { Layout } from "../types";
@@ -14,8 +11,6 @@ interface NavigationProps {
   handleAddPCInput: () => void;
   savePreset: () => void;
   handleLoadPreset: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  globalMidiChannel: number | null;
-  handleGlobalMidiChannelChange: (channel: number) => void;
   layout: Layout;
   onToggleLayout: () => void;
 }
@@ -25,8 +20,6 @@ const Navigation = ({
   handleAddPCInput,
   savePreset,
   handleLoadPreset,
-  globalMidiChannel,
-  handleGlobalMidiChannelChange,
   layout,
   onToggleLayout,
 }: NavigationProps) => {
@@ -45,26 +38,6 @@ const Navigation = ({
           value=""
         />
       </LoadButton>
-      <GlobalChannelContainer>
-        <GlobalChannelLabel htmlFor="global-select">
-          Global Channel:
-        </GlobalChannelLabel>
-        <GlobalChannelSelect
-          id="global-select"
-          value={globalMidiChannel ?? ""}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (val) handleGlobalMidiChannelChange(Number(val));
-          }}
-        >
-          <option value="">—</option>
-          {Array.from({ length: 16 }, (_, i) => i + 1).map((channel) => (
-            <option key={channel} value={channel}>
-              {channel}
-            </option>
-          ))}
-        </GlobalChannelSelect>
-      </GlobalChannelContainer>
       <LayoutButton
         onClick={onToggleLayout}
         aria-pressed={layout === "row"}

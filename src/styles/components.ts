@@ -92,11 +92,6 @@ export const NavBar = styled.nav`
   box-shadow: var(--shadow-nav);
 
   @media (max-width: ${theme.breakpoints.rowStack}) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  @media (max-width: ${theme.breakpoints.narrow}) {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -123,13 +118,6 @@ export const LoadButton = styled(NavButton).attrs({ as: "label" })`
     left: 0;
     cursor: pointer;
   }
-`;
-
-export const GlobalChannelContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${theme.spacing.sm};
 `;
 
 export const LayoutButton = styled(NavButton)`
@@ -263,7 +251,7 @@ export const FormTitleDisplay = styled.h3`
   &:hover {
     background: var(--primary-alpha-5);
     border-color: var(--surface-glass-border);
-    color: var(--primary);
+    color: var(--title-hover);
   }
 
   &:focus-visible {
@@ -361,7 +349,7 @@ export const RemoveButton = styled.button`
 
     &::before,
     &::after {
-      background: var(--danger);
+      background: var(--remove-hover);
     }
   }
 
@@ -671,16 +659,7 @@ export const RangeInput = styled.input`
   }
 `;
 
-export const GlobalChannelLabel = styled(FormLabel)`
-  font-size: ${theme.fonts.sizes.body};
-  color: var(--text-primary);
-
-  &::before {
-    display: none;
-  }
-`;
-
-export const GlobalChannelSelect = styled(Select)`
+export const DeviceSelect = styled(Select)`
   min-width: 80px;
 `;
 
