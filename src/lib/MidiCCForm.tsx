@@ -12,6 +12,7 @@ import {
   MidiFormContainer,
   FormHeader,
   FormHeaderContent,
+  DragHandleButton,
   FormTitleDisplay,
   FormTitleInput,
   RemoveButton,
@@ -86,19 +87,23 @@ const MidiCCForm = memo(
     return (
       <MidiFormContainer
         ref={dragRef}
-        onPointerDown={handlePointerDown}
         data-layout={layout}
         style={{
           background: backgroundColor + "55",
           ...(isDragging && { opacity: 0 }),
-          cursor: "grab",
-          touchAction: "none",
         }}
         role="group"
         aria-label={label}
       >
         <FormHeader>
           <FormHeaderContent>
+            <DragHandleButton
+              type="button"
+              $dotColor={backgroundColor}
+              aria-label={`Drag ${label} to reorder`}
+              title="Drag to reorder"
+              onPointerDown={handlePointerDown}
+            />
             {isEditing ? (
               <FormTitleInput
                 type="text"

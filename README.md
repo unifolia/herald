@@ -44,12 +44,6 @@ PC blocks send MIDI Program Change messages.
 - Titles and colors work the same way as they do for CC blocks.
 - Refer to your pedal or device's MIDI documentation for what PC message corresponds to what setting.
 
-### Global Channel
-
-Use **Global Channel** when every block should use the same MIDI channel.
-Choosing a channel updates all current CC and PC blocks. New blocks will start
-on that channel too.
-
 ### Layouts
 
 Use the layout button to switch between:

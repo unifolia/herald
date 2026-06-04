@@ -8,8 +8,6 @@ import {
   useEffect,
 } from "react";
 
-const INTERACTIVE_SELECTOR = "select, input, button, textarea, .react-colorful";
-
 const useDragReorder = (
   items: { id: number }[],
   onCommit: (orderedIds: number[]) => void,
@@ -22,6 +20,9 @@ const useDragReorder = (
   const orderedIdsRef = useRef(orderedIds);
   const onCommitRef = useRef(onCommit);
   const itemElsRef = useRef(new Map<number, HTMLElement>());
+  const refCacheRef = useRef(
+    new Map<number, (el: HTMLElement | null) => void>(),
+  );
   const prevRectsRef = useRef(new Map<number, DOMRect>());
   const needsFlipRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -35,8 +36,17 @@ const useDragReorder = (
   useEffect(() => () => cleanupRef.current?.(), []);
 
   useEffect(() => {
-    if (dragActiveRef.current) return;
     const newIds = items.map((i) => i.id);
+    const liveIds = new Set(newIds);
+
+    itemElsRef.current.forEach((_el, id) => {
+      if (!liveIds.has(id)) itemElsRef.current.delete(id);
+    });
+    refCacheRef.current.forEach((_ref, id) => {
+      if (!liveIds.has(id)) refCacheRef.current.delete(id);
+    });
+
+    if (dragActiveRef.current) return;
     setOrderedIds(newIds);
     orderedIdsRef.current = newIds;
   }, [items]);
@@ -105,11 +115,21 @@ const useDragReorder = (
       slots.push({ id, rect: el.getBoundingClientRect() });
     }
 
+    const rectsShareRow = (a: DOMRect, b: DOMRect) =>
+      a.top < b.bottom - 1 && b.top < a.bottom - 1;
+
     let singleColumn = true;
     for (let i = 1; i < slots.length; i++) {
-      if (slots[i].rect.top < slots[i - 1].rect.bottom - 1) {
+      if (rectsShareRow(slots[i].rect, slots[i - 1].rect)) {
         singleColumn = false;
         break;
+      }
+    }
+
+    if (singleColumn && slots.length === 1) {
+      const dragRect = itemElsRef.current.get(dragId)?.getBoundingClientRect();
+      if (dragRect && rectsShareRow(dragRect, slots[0].rect)) {
+        singleColumn = false;
       }
     }
 
@@ -129,9 +149,6 @@ const useDragReorder = (
     return slots.length;
   };
 
-  const refCacheRef = useRef(
-    new Map<number, (el: HTMLElement | null) => void>(),
-  );
   const registerRef = useCallback((id: number) => {
     let fn = refCacheRef.current.get(id);
     if (!fn) {
@@ -148,20 +165,31 @@ const useDragReorder = (
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent, id: number) => {
-    const target = e.target as HTMLElement;
-    if (target.closest(INTERACTIVE_SELECTOR)) return;
+    if (cleanupRef.current) return;
     if (e.button !== 0) return;
+    if (!orderedIdsRef.current.includes(id)) return;
 
     const el = itemElsRef.current.get(id);
     if (!el) return;
 
     e.preventDefault();
+    e.stopPropagation();
+
+    const pointerId = e.pointerId;
+    const handleEl = e.currentTarget as HTMLElement;
+    try {
+      handleEl.setPointerCapture(pointerId);
+    } catch {
+      // Pointer capture can fail if the pointer has already been released.
+    }
 
     const rect = el.getBoundingClientRect();
     const startX = e.clientX;
     const startY = e.clientY;
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
+    const previousBodyCursor = document.body.style.cursor;
+    const previousBodyUserSelect = document.body.style.userSelect;
 
     let clone: HTMLElement | null = null;
     let activated = false;
@@ -201,6 +229,8 @@ const useDragReorder = (
     };
 
     const onMove = (me: PointerEvent) => {
+      if (me.pointerId !== pointerId) return;
+
       if (!activated) {
         const dx = me.clientX - startX;
         const dy = me.clientY - startY;
@@ -229,12 +259,22 @@ const useDragReorder = (
     const cleanup = () => {
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onCancel);
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
+      window.removeEventListener("blur", onWindowBlur);
+      document.body.style.cursor = previousBodyCursor;
+      document.body.style.userSelect = previousBodyUserSelect;
+
+      try {
+        if (handleEl.hasPointerCapture(pointerId)) {
+          handleEl.releasePointerCapture(pointerId);
+        }
+      } catch {
+        // The browser can release capture before our cleanup runs.
+      }
     };
 
-    const abort = () => {
+    const abort = (resetDraggedId = true) => {
       if (finished) return;
       finished = true;
       cleanup();
@@ -245,11 +285,13 @@ const useDragReorder = (
       if (clone) clone.remove();
       el.style.opacity = "";
       el.style.transition = "";
+      if (resetDraggedId) setDraggedId(null);
       dragActiveRef.current = false;
       cleanupRef.current = null;
     };
 
-    const onUp = () => {
+    const onUp = (ue: PointerEvent) => {
+      if (ue.pointerId !== pointerId) return;
       if (finished) return;
       cleanup();
 
@@ -294,20 +336,31 @@ const useDragReorder = (
       }, 200);
     };
 
+    const onCancel = (ce: PointerEvent) => {
+      if (ce.pointerId !== pointerId) return;
+      abort();
+    };
+
+    const onWindowBlur = () => {
+      abort();
+    };
+
     const onKeyDown = (ke: KeyboardEvent) => {
       if (ke.key === "Escape") {
         snapshotRects();
         orderedIdsRef.current = originalOrder;
         setOrderedIds(originalOrder);
         setDraggedId(null);
-        abort();
+        abort(false);
       }
     };
 
-    cleanupRef.current = abort;
+    cleanupRef.current = () => abort(false);
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerup", onUp);
+    document.addEventListener("pointercancel", onCancel);
     document.addEventListener("keydown", onKeyDown);
+    window.addEventListener("blur", onWindowBlur);
   }, []);
 
   return {

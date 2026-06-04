@@ -135,6 +135,9 @@ export const ThemeToggleButton = styled(BaseButton)`
 
 // Form Components
 export const FormsContainer = styled.div<{ $layout?: Layout }>`
+  width: 100%;
+  min-width: 0;
+
   ${({ $layout }) =>
     $layout === "row"
       ? css`
@@ -152,21 +155,26 @@ export const FormsContainer = styled.div<{ $layout?: Layout }>`
 
             & > * {
               flex: 0 0 calc(50% - 2.5px);
+              min-width: 0;
               max-width: calc(50% - 2.5px);
             }
           }
         `
       : css`
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: ${theme.spacing.lg};
 
+          @media (max-width: ${theme.breakpoints.rowStack}) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
           @media (max-width: ${theme.breakpoints.narrow}) {
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
           }
 
           @media (min-width: ${theme.breakpoints.big}) {
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, minmax(0, 1fr));
           }
         `}
 `;
@@ -182,6 +190,8 @@ export const MidiFormContainer = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
 
   &:hover {
     box-shadow: var(--shadow-glass-hover);
@@ -205,6 +215,7 @@ export const FormHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: ${theme.spacing.md};
+  min-width: 0;
   margin-bottom: ${theme.spacing.lg};
   padding-bottom: ${theme.spacing.md};
   border-bottom: 1px solid var(--surface-glass-border);
@@ -223,14 +234,106 @@ export const FormHeader = styled.div`
 `;
 
 export const FormHeaderContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.xs};
   flex: 1;
+  min-width: 0;
 
   ${rowWide(css`
     flex: 0 0 auto;
   `)}
 `;
 
+export const DragHandleButton = styled.button<{ $dotColor?: string }>`
+  --drag-handle-dot-color: ${"var(--primary)"};
+
+  width: 32px;
+  height: 2.55rem;
+  min-width: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: var(--surface-subtle);
+  border: 1px solid var(--surface-glass-border);
+  border-radius: ${theme.borderRadius.md};
+  cursor: grab;
+  touch-action: none;
+  transition: ${theme.transitions.default};
+  color: var(--text-secondary);
+
+  &::before {
+    content: "";
+    width: 12px;
+    height: 18px;
+    background:
+      radial-gradient(
+        circle at 2px 2px,
+        var(--inset-highlight-strong) 0 0.8px,
+        var(--drag-handle-dot-color) 1px 2px,
+        transparent 2.2px
+      ),
+      radial-gradient(
+        circle at 10px 2px,
+        var(--inset-highlight-strong) 0 0.8px,
+        var(--drag-handle-dot-color) 1px 2px,
+        transparent 2.2px
+      ),
+      radial-gradient(
+        circle at 2px 9px,
+        var(--inset-highlight-strong) 0 0.8px,
+        var(--drag-handle-dot-color) 1px 2px,
+        transparent 2.2px
+      ),
+      radial-gradient(
+        circle at 10px 9px,
+        var(--inset-highlight-strong) 0 0.8px,
+        var(--drag-handle-dot-color) 1px 2px,
+        transparent 2.2px
+      ),
+      radial-gradient(
+        circle at 2px 16px,
+        var(--inset-highlight-strong) 0 0.8px,
+        var(--drag-handle-dot-color) 1px 2px,
+        transparent 2.2px
+      ),
+      radial-gradient(
+        circle at 10px 16px,
+        var(--inset-highlight-strong) 0 0.8px,
+        var(--drag-handle-dot-color) 1px 2px,
+        transparent 2.2px
+      );
+  }
+
+  &:hover {
+    background: var(--primary-alpha-5);
+    border-color: var(--surface-glass-border);
+    color: var(--title-hover);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  ${rowWide(css`
+    width: 28px;
+    height: 2.25rem;
+    min-width: 28px;
+
+    &::before {
+      transform: translate(-4px, -6px) scale(0.88);
+    }
+  `)}
+`;
+
 export const FormTitleDisplay = styled.h3`
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
   padding: ${theme.spacing.xs} ${theme.spacing.sm};
   font-size: ${theme.fonts.sizes.form};
@@ -248,6 +351,14 @@ export const FormTitleDisplay = styled.h3`
   box-sizing: border-box;
   text-align: center;
 
+  [data-layout] & {
+    height: 2.55rem;
+    max-height: 2.55rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   &:hover {
     background: var(--primary-alpha-5);
     border-color: var(--surface-glass-border);
@@ -264,19 +375,20 @@ export const FormTitleDisplay = styled.h3`
   }
 
   ${rowWide(css`
+    flex: 0 0 250px;
     width: 250px;
     box-sizing: border-box;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 
     @media (min-width: ${theme.breakpoints.huge}) {
+      flex-basis: 150px;
       width: 150px;
     }
   `)}
 `;
 
 export const FormTitleInput = styled.input`
+  flex: 1 1 auto;
+  min-width: 0;
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
@@ -301,9 +413,11 @@ export const FormTitleInput = styled.input`
   }
 
   ${rowWide(css`
+    flex: 0 0 250px;
     width: 250px;
 
     @media (min-width: ${theme.breakpoints.huge}) {
+      flex-basis: 150px;
       width: 150px;
     }
   `)}
