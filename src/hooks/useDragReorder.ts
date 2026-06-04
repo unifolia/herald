@@ -13,6 +13,8 @@ type LayoutRect = Pick<
   "top" | "right" | "bottom" | "left" | "width" | "height"
 >;
 
+const edgeSwapProgress = 2 / 3;
+
 const getAnimationlessRect = (el: HTMLElement): LayoutRect => {
   const rect = el.getBoundingClientRect();
   const transform = window.getComputedStyle(el).transform;
@@ -130,9 +132,9 @@ const useDragReorder = (
   };
 
   const computeTargetIndex = (
-    pointerX: number,
     pointerY: number,
     dragId: number,
+    dragRect: LayoutRect,
   ): number => {
     const currentOrder = orderedIdsRef.current;
 
@@ -157,22 +159,44 @@ const useDragReorder = (
 
     if (singleColumn && slots.length === 1) {
       const dragEl = itemElsRef.current.get(dragId);
-      const dragRect = dragEl ? getAnimationlessRect(dragEl) : null;
-      if (dragRect && rectsShareRow(dragRect, slots[0].rect)) {
+      const placeholderRect = dragEl ? getAnimationlessRect(dragEl) : null;
+      if (placeholderRect && rectsShareRow(placeholderRect, slots[0].rect)) {
         singleColumn = false;
       }
     }
+
+    const dragOrderIndex = currentOrder.indexOf(dragId);
 
     for (let i = 0; i < slots.length; i++) {
       const { rect } = slots[i];
 
       if (singleColumn) {
-        const midY = rect.top + rect.height / 2;
-        if (pointerY < midY) return i;
+        const slotOrderIndex = currentOrder.indexOf(slots[i].id);
+
+        // In a stacked list, use the dragged card's leading edge so upward and
+        // downward swaps require roughly the same amount of visual overlap.
+        if (slotOrderIndex < dragOrderIndex) {
+          const threshold = rect.bottom - rect.height * edgeSwapProgress;
+          if (dragRect.top < threshold) return i;
+        } else {
+          const threshold = rect.top + rect.height * edgeSwapProgress;
+          if (dragRect.bottom < threshold) return i;
+        }
       } else {
-        const midX = rect.left + rect.width / 2;
         if (pointerY < rect.top) return i;
-        if (pointerY < rect.bottom && pointerX < midX) return i;
+        if (pointerY < rect.bottom) {
+          const slotOrderIndex = currentOrder.indexOf(slots[i].id);
+
+          // In a row, use the dragged card's horizontal leading edge so
+          // leftward and rightward swaps share the same visual threshold.
+          if (slotOrderIndex < dragOrderIndex) {
+            const threshold = rect.right - rect.width * edgeSwapProgress;
+            if (dragRect.left < threshold) return i;
+          } else {
+            const threshold = rect.left + rect.width * edgeSwapProgress;
+            if (dragRect.right < threshold) return i;
+          }
+        }
       }
     }
 
@@ -268,12 +292,23 @@ const useDragReorder = (
         activate();
       }
 
+      const dragLeft = me.clientX - offsetX;
+      const dragTop = me.clientY - offsetY;
+      const dragRect = {
+        top: dragTop,
+        right: dragLeft + rect.width,
+        bottom: dragTop + rect.height,
+        left: dragLeft,
+        width: rect.width,
+        height: rect.height,
+      };
+
       if (clone) {
-        clone.style.left = `${me.clientX - offsetX}px`;
-        clone.style.top = `${me.clientY - offsetY}px`;
+        clone.style.left = `${dragLeft}px`;
+        clone.style.top = `${dragTop}px`;
       }
 
-      const targetIdx = computeTargetIndex(me.clientX, me.clientY, id);
+      const targetIdx = computeTargetIndex(me.clientY, id, dragRect);
       const currentOrder = orderedIdsRef.current;
       const withoutDragged = currentOrder.filter((cid) => cid !== id);
       const newOrder = [...withoutDragged];
