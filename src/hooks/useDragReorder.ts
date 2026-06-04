@@ -8,6 +8,35 @@ import {
   useEffect,
 } from "react";
 
+type LayoutRect = Pick<
+  DOMRect,
+  "top" | "right" | "bottom" | "left" | "width" | "height"
+>;
+
+const getAnimationlessRect = (el: HTMLElement): LayoutRect => {
+  const rect = el.getBoundingClientRect();
+  const transform = window.getComputedStyle(el).transform;
+
+  if (!transform || transform === "none") return rect;
+
+  try {
+    const matrix = new DOMMatrixReadOnly(transform);
+    const left = rect.left - matrix.m41;
+    const top = rect.top - matrix.m42;
+
+    return {
+      top,
+      right: left + rect.width,
+      bottom: top + rect.height,
+      left,
+      width: rect.width,
+      height: rect.height,
+    };
+  } catch {
+    return rect;
+  }
+};
+
 const useDragReorder = (
   items: { id: number }[],
   onCommit: (orderedIds: number[]) => void,
@@ -107,15 +136,15 @@ const useDragReorder = (
   ): number => {
     const currentOrder = orderedIdsRef.current;
 
-    const slots: { id: number; rect: DOMRect }[] = [];
+    const slots: { id: number; rect: LayoutRect }[] = [];
     for (const id of currentOrder) {
       if (id === dragId) continue;
       const el = itemElsRef.current.get(id);
       if (!el) continue;
-      slots.push({ id, rect: el.getBoundingClientRect() });
+      slots.push({ id, rect: getAnimationlessRect(el) });
     }
 
-    const rectsShareRow = (a: DOMRect, b: DOMRect) =>
+    const rectsShareRow = (a: LayoutRect, b: LayoutRect) =>
       a.top < b.bottom - 1 && b.top < a.bottom - 1;
 
     let singleColumn = true;
@@ -127,7 +156,8 @@ const useDragReorder = (
     }
 
     if (singleColumn && slots.length === 1) {
-      const dragRect = itemElsRef.current.get(dragId)?.getBoundingClientRect();
+      const dragEl = itemElsRef.current.get(dragId);
+      const dragRect = dragEl ? getAnimationlessRect(dragEl) : null;
       if (dragRect && rectsShareRow(dragRect, slots[0].rect)) {
         singleColumn = false;
       }

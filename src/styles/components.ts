@@ -324,10 +324,6 @@ export const DragHandleButton = styled.button<{ $dotColor?: string }>`
     width: 28px;
     height: 2.25rem;
     min-width: 28px;
-
-    &::before {
-      transform: translate(-4px, -6px) scale(0.88);
-    }
   `)}
 `;
 
@@ -527,7 +523,7 @@ export const FormGroup = styled.div`
 
   [data-layout="row"] &:has(input[type="range"]) {
     @media (min-width: calc(${theme.breakpoints.rowStack} + 1px)) {
-      min-width: 150px;
+      min-width: 140px;
     }
   }
 
