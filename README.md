@@ -64,7 +64,6 @@ Presets are saved as JSON files. A preset includes:
 - CC block data.
 - PC block data.
 - Block order.
-- Selected global MIDI channel, if one is set.
 
 Load saved files with **Load Preset**. The loader validates the shape of the preset
 file before applying it, so that you can't just load anything.
