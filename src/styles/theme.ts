@@ -26,8 +26,8 @@ const darkColors = {
   dangerAlpha10: "rgba(196, 73, 45, 0.1)",
   dangerAlpha30: "rgba(196, 73, 45, 0.3)",
 
-  titleHover: "#ff8d28", // editable-title hover ink (= primary)
-  removeHover: "#c4492d", // remove-X hover ink (= danger)
+  titleHover: "#ff8d28",
+  removeHover: "#c4492d",
 
   black: "#070503",
   insetHighlight: "rgba(243, 231, 197, 0.1)",

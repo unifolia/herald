@@ -28,7 +28,7 @@ export const getInitialColorScheme = (): ColorScheme => {
       return storedScheme;
     }
   } catch {
-    // Ignore storage access errors and fall back to the system preference.
+    //
   }
 
   return getSystemColorScheme();
@@ -41,6 +41,6 @@ export const saveColorSchemePreference = (colorScheme: ColorScheme) => {
   try {
     window.localStorage.setItem(THEME_STORAGE_KEY, colorScheme);
   } catch {
-    // Ignore storage access errors; the in-memory toggle still works.
+    //
   }
 };

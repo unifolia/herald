@@ -173,8 +173,6 @@ const useDragReorder = (
       if (singleColumn) {
         const slotOrderIndex = currentOrder.indexOf(slots[i].id);
 
-        // In a stacked list, use the dragged card's leading edge so upward and
-        // downward swaps require roughly the same amount of visual overlap.
         if (slotOrderIndex < dragOrderIndex) {
           const threshold = rect.bottom - rect.height * edgeSwapProgress;
           if (dragRect.top < threshold) return i;
@@ -187,8 +185,6 @@ const useDragReorder = (
         if (pointerY < rect.bottom) {
           const slotOrderIndex = currentOrder.indexOf(slots[i].id);
 
-          // In a row, use the dragged card's horizontal leading edge so
-          // leftward and rightward swaps share the same visual threshold.
           if (slotOrderIndex < dragOrderIndex) {
             const threshold = rect.right - rect.width * edgeSwapProgress;
             if (dragRect.left < threshold) return i;
@@ -234,7 +230,7 @@ const useDragReorder = (
     try {
       handleEl.setPointerCapture(pointerId);
     } catch {
-      // Pointer capture can fail if the pointer has already been released.
+      //
     }
 
     const rect = el.getBoundingClientRect();
