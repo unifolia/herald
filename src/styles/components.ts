@@ -246,7 +246,7 @@ export const FormHeaderContent = styled.div`
 `;
 
 export const DragHandleButton = styled.button<{ $dotColor?: string }>`
-  --drag-handle-dot-color: ${"var(--primary)"};
+  --drag-handle-dot-color: var(--text-primary);
 
   width: 32px;
   height: 2.55rem;
