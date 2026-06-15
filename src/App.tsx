@@ -10,6 +10,7 @@ import {
 } from "./styles/components";
 import { GlobalStyles, Title } from "./styles/GlobalStyles";
 import Navigation from "./lib/NavBar";
+import PresetBrowser from "./lib/PresetBrowser";
 import Device from "./lib/Device";
 import useMIDI from "./hooks/useMIDI";
 import useDragReorder from "./hooks/useDragReorder";
@@ -36,6 +37,7 @@ const App = () => {
     getDefaultBackgroundColor(colorScheme),
   );
   const [layout, setLayout] = useState<Layout>("tile");
+  const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
   const {
     forms,
     pcForms,
@@ -101,6 +103,7 @@ const App = () => {
       }
 
       setPresetState(result.preset);
+      setIsLoadModalOpen(false);
     },
     [setPresetState],
   );
@@ -126,10 +129,23 @@ const App = () => {
             handleAddCCInput={handleAddCCInput}
             handleAddPCInput={handleAddPCInput}
             savePreset={savePreset}
-            handleLoadPreset={handleLoadPreset}
+            openLoadPreset={() => setIsLoadModalOpen(true)}
             layout={layout}
             onToggleLayout={toggleLayout}
           />
+
+          {isLoadModalOpen && (
+            <PresetBrowser
+              backgroundColor={getDefaultBackgroundColor(colorScheme)}
+              maxBlocks={MAX_BLOCKS}
+              onClose={() => setIsLoadModalOpen(false)}
+              onLoadPreset={(preset) => {
+                setPresetState(preset);
+                setIsLoadModalOpen(false);
+              }}
+              onUploadFile={handleLoadPreset}
+            />
+          )}
 
           <Header name={forms.name} setName={setPresetName} />
 

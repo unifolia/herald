@@ -1,16 +1,11 @@
-import {
-  NavBar,
-  NavButton,
-  LoadButton,
-  LayoutButton,
-} from "../styles/components";
+import { NavBar, NavButton, LayoutButton } from "../styles/components";
 import type { Layout } from "../types";
 
 interface NavigationProps {
   handleAddCCInput: () => void;
   handleAddPCInput: () => void;
   savePreset: () => void;
-  handleLoadPreset: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  openLoadPreset: () => void;
   layout: Layout;
   onToggleLayout: () => void;
 }
@@ -19,7 +14,7 @@ const Navigation = ({
   handleAddCCInput,
   handleAddPCInput,
   savePreset,
-  handleLoadPreset,
+  openLoadPreset,
   layout,
   onToggleLayout,
 }: NavigationProps) => {
@@ -28,16 +23,7 @@ const Navigation = ({
       <NavButton onClick={handleAddCCInput}>Add CC Input</NavButton>
       <NavButton onClick={handleAddPCInput}>Add PC Input</NavButton>
       <NavButton onClick={savePreset}>Save Preset</NavButton>
-      <LoadButton htmlFor="upload">
-        Load Preset
-        <input
-          id="upload"
-          type="file"
-          accept=".json"
-          onChange={handleLoadPreset}
-          value=""
-        />
-      </LoadButton>
+      <NavButton onClick={openLoadPreset}>Load Preset</NavButton>
       <LayoutButton
         onClick={onToggleLayout}
         aria-pressed={layout === "row"}
