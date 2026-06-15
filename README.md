@@ -1,3 +1,7 @@
+# A Quick Note:
+
+Consider Herald to be open source. There isn't anything proprietary or technically special here. Making music is one of the greatest joys of life, so I am happy to freely share any tool that is part of that process. And I am always open to collaborate on any projects, apps, or forks based on this. I'd love to see what you make! james@jameslewis.io
+
 # Herald
 
 Herald is a control station for your MIDI-equipped guitar pedals. Pick a device, nudge some sliders, fire a program change, and save the whole setup as a preset for next time. 🎸
