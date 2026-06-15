@@ -88,8 +88,10 @@ const inlineSelectNarrow = css`
   }
 `;
 
-const formTitleHeight = "2rem";
-const tileHeaderControlSize = "28px";
+const headerControlHeight = "32px";
+const dragHandleWidth = "28px";
+const removeButtonSize = headerControlHeight;
+const formTitleHeight = headerControlHeight;
 const tileSlotHeight = "40px";
 
 const stackedRangeBox = css`
@@ -301,9 +303,9 @@ export const FormHeaderContent = styled.div`
 export const DragHandleButton = styled.button<{ $dotColor?: string }>`
   --drag-handle-dot-color: var(--text-primary);
 
-  width: ${tileHeaderControlSize};
-  height: 2.25rem;
-  min-width: ${tileHeaderControlSize};
+  width: ${dragHandleWidth};
+  height: ${headerControlHeight};
+  min-width: ${dragHandleWidth};
   display: grid;
   place-items: center;
   padding: 0;
@@ -372,18 +374,6 @@ export const DragHandleButton = styled.button<{ $dotColor?: string }>`
     outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
-
-  ${tileWide(css`
-    width: ${tileHeaderControlSize};
-    height: ${tileHeaderControlSize};
-    min-width: ${tileHeaderControlSize};
-  `)}
-
-  ${rowWide(css`
-    width: 26px;
-    height: ${formTitleHeight};
-    min-width: 26px;
-  `)}
 `;
 
 export const FormTitleDisplay = styled.h3`
@@ -413,13 +403,6 @@ export const FormTitleDisplay = styled.h3`
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
-  ${tileWide(css`
-    height: ${tileHeaderControlSize};
-    min-height: ${tileHeaderControlSize};
-    max-height: ${tileHeaderControlSize};
-    line-height: calc(${tileHeaderControlSize} - 2px);
-  `)}
 
   &:hover {
     background: var(--primary-alpha-5);
@@ -474,11 +457,6 @@ export const FormTitleInput = styled.input`
   backdrop-filter: blur(10px);
   text-align: center;
 
-  ${tileWide(css`
-    height: ${tileHeaderControlSize};
-    min-height: ${tileHeaderControlSize};
-  `)}
-
   &.header {
     height: auto;
     font-size: 1.8rem;
@@ -499,9 +477,9 @@ export const FormTitleInput = styled.input`
 `;
 
 export const RemoveButton = styled.button`
-  width: ${tileHeaderControlSize};
-  height: ${tileHeaderControlSize};
-  min-width: ${tileHeaderControlSize};
+  width: ${removeButtonSize};
+  height: ${removeButtonSize};
+  min-width: ${removeButtonSize};
   padding: 0;
   position: relative;
   background: var(--surface-subtle);
@@ -556,25 +534,9 @@ export const RemoveButton = styled.button`
     display: none;
   }
 
-  ${tileWide(css`
-    &[data-placement="header"] {
-      width: ${tileHeaderControlSize};
-      height: ${tileHeaderControlSize};
-      min-width: ${tileHeaderControlSize};
-    }
-  `)}
-
   ${rowWide(css`
     &[data-placement="end"] {
       display: inline-block;
-      width: 24px;
-      height: 24px;
-      min-width: 24px;
-
-      &::before,
-      &::after {
-        width: 12px;
-      }
     }
 
     &[data-placement="header"] {
@@ -660,7 +622,7 @@ export const ColorPicker = styled(FormGroup)`
 `;
 
 export const ColorSwatch = styled.button`
-  width: 42%;
+  width: 64px;
   height: 32px;
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.md};
@@ -675,15 +637,6 @@ export const ColorSwatch = styled.button`
     outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
-
-  ${rowWide(css`
-    width: 36px;
-    height: 26px;
-  `)}
-
-  ${narrowStacked(css`
-    height: 28px;
-  `)}
 `;
 
 export const ColorPopover = styled.div`
