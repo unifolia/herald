@@ -167,7 +167,7 @@ export const theme = {
   },
   shadows: darkShadows,
   breakpoints: {
-    narrow: "700px",
+    narrow: "588px",
     rowStack: "1080px",
     big: "1440px",
     huge: "1900px",

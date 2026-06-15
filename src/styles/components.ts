@@ -20,6 +20,24 @@ const rowWideSelf = (styles: ReturnType<typeof css>) => css`
   }
 `;
 
+const aboveNarrow = `calc(${theme.breakpoints.narrow} + 1px)`;
+
+const tileWide = (styles: ReturnType<typeof css>) => css`
+  [data-layout="tile"] & {
+    @media (min-width: ${aboveNarrow}) {
+      ${styles}
+    }
+  }
+`;
+
+const tileWideSelf = (styles: ReturnType<typeof css>) => css`
+  &[data-layout="tile"] {
+    @media (min-width: ${aboveNarrow}) {
+      ${styles}
+    }
+  }
+`;
+
 const narrowStacked = (styles: ReturnType<typeof css>) => css`
   @media (max-width: ${theme.breakpoints.narrow}) {
     ${styles}
@@ -60,24 +78,33 @@ const inlineSelectNarrow = css`
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  gap: ${theme.spacing.sm};
+  gap: ${theme.spacing.xs};
 
   select {
-    flex: 0 1 auto;
-    min-width: 70px;
-    max-width: 150px;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 62px;
+    max-width: 130px;
   }
 `;
 
+const formTitleHeight = "2rem";
+const tileHeaderControlSize = "28px";
+const tileSlotHeight = "40px";
+
 const stackedRangeBox = css`
-  height: 40px;
+  height: ${tileSlotHeight};
   box-sizing: border-box;
   justify-content: center;
   margin-top: ${theme.spacing.sm};
   margin-bottom: ${theme.spacing.sm};
 `;
 
-const tileSlotHeight = "48px";
+const tileColumnBreakpoints = {
+  two: aboveNarrow,
+  three: "858px",
+  four: "1128px",
+} as const;
 
 export const NavBar = styled.nav`
   display: flex;
@@ -100,7 +127,7 @@ export const NavBar = styled.nav`
 `;
 
 export const NavButton = styled(BaseButton)`
-  min-width: 120px;
+  min-width: 100px;
 `;
 
 export const LoadButton = styled(NavButton).attrs({ as: "label" })`
@@ -162,19 +189,33 @@ export const FormsContainer = styled.div<{ $layout?: Layout }>`
         `
       : css`
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: ${theme.spacing.lg};
+          grid-template-columns: minmax(0, 1fr);
+          grid-auto-rows: 1fr;
+          gap: ${theme.spacing.md};
+          justify-content: start;
 
-          @media (max-width: ${theme.breakpoints.rowStack}) {
+          @media (max-width: ${theme.breakpoints.narrow}) {
+            gap: ${theme.spacing.lg};
+          }
+
+          @media (min-width: ${tileColumnBreakpoints.two}) {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
-          @media (max-width: ${theme.breakpoints.narrow}) {
-            grid-template-columns: minmax(0, 1fr);
+          @media (min-width: ${tileColumnBreakpoints.three}) {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+
+          @media (min-width: ${tileColumnBreakpoints.four}) {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
           }
 
           @media (min-width: ${theme.breakpoints.big}) {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+          }
+
+          @media (min-width: ${theme.breakpoints.huge}) {
+            grid-template-columns: repeat(8, minmax(0, 1fr));
           }
         `}
 `;
@@ -185,13 +226,17 @@ export const MidiFormContainer = styled.div`
   backdrop-filter: blur(20px);
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.xl};
-  padding: ${theme.spacing.lg};
+  padding: ${theme.spacing.md};
   box-shadow: var(--shadow-glass);
   position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
   max-width: 100%;
+
+  ${tileWideSelf(css`
+    padding: ${theme.spacing.xs};
+  `)}
 
   &:hover {
     box-shadow: var(--shadow-glass-hover);
@@ -201,8 +246,8 @@ export const MidiFormContainer = styled.div`
   ${rowWideSelf(css`
     flex-direction: row;
     align-items: center;
-    gap: ${theme.spacing.md};
-    padding: ${theme.spacing.sm} ${theme.spacing.md};
+    gap: ${theme.spacing.sm};
+    padding: 0.45rem ${theme.spacing.sm};
   `)}
 
   ${narrowStackedSelf(css`
@@ -214,11 +259,15 @@ export const FormHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: ${theme.spacing.md};
+  gap: ${theme.spacing.sm};
   min-width: 0;
-  margin-bottom: ${theme.spacing.lg};
-  padding-bottom: ${theme.spacing.md};
+  margin-bottom: ${theme.spacing.sm};
+  padding-bottom: ${theme.spacing.sm};
   border-bottom: 1px solid var(--surface-glass-border);
+
+  ${tileWide(css`
+    gap: 0.25rem;
+  `)}
 
   ${rowWide(css`
     margin-bottom: 0;
@@ -240,6 +289,10 @@ export const FormHeaderContent = styled.div`
   flex: 1;
   min-width: 0;
 
+  ${tileWide(css`
+    gap: 0.25rem;
+  `)}
+
   ${rowWide(css`
     flex: 0 0 auto;
   `)}
@@ -248,9 +301,9 @@ export const FormHeaderContent = styled.div`
 export const DragHandleButton = styled.button<{ $dotColor?: string }>`
   --drag-handle-dot-color: var(--text-primary);
 
-  width: 32px;
-  height: 2.55rem;
-  min-width: 32px;
+  width: ${tileHeaderControlSize};
+  height: 2.25rem;
+  min-width: ${tileHeaderControlSize};
   display: grid;
   place-items: center;
   padding: 0;
@@ -320,10 +373,16 @@ export const DragHandleButton = styled.button<{ $dotColor?: string }>`
     outline-offset: 2px;
   }
 
+  ${tileWide(css`
+    width: ${tileHeaderControlSize};
+    height: ${tileHeaderControlSize};
+    min-width: ${tileHeaderControlSize};
+  `)}
+
   ${rowWide(css`
-    width: 28px;
-    height: 2.25rem;
-    min-width: 28px;
+    width: 26px;
+    height: ${formTitleHeight};
+    min-width: 26px;
   `)}
 `;
 
@@ -331,10 +390,10 @@ export const FormTitleDisplay = styled.h3`
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;
-  padding: ${theme.spacing.xs} ${theme.spacing.sm};
-  font-size: ${theme.fonts.sizes.form};
-  line-height: 1.4;
-  min-height: 2.55rem;
+  padding: 0 ${theme.spacing.xs};
+  font-size: 14px;
+  line-height: calc(${formTitleHeight} - 2px);
+  min-height: ${formTitleHeight};
   font-weight: ${theme.fonts.weights.normal};
   color: var(--text-primary);
   text-transform: lowercase;
@@ -348,12 +407,19 @@ export const FormTitleDisplay = styled.h3`
   text-align: center;
 
   [data-layout] & {
-    height: 2.55rem;
-    max-height: 2.55rem;
+    height: ${formTitleHeight};
+    max-height: ${formTitleHeight};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  ${tileWide(css`
+    height: ${tileHeaderControlSize};
+    min-height: ${tileHeaderControlSize};
+    max-height: ${tileHeaderControlSize};
+    line-height: calc(${tileHeaderControlSize} - 2px);
+  `)}
 
   &:hover {
     background: var(--primary-alpha-5);
@@ -368,6 +434,9 @@ export const FormTitleDisplay = styled.h3`
 
   &.header {
     font-size: 1.8rem;
+    line-height: 1.4;
+    min-height: 2.55rem;
+    padding: ${theme.spacing.xs} ${theme.spacing.sm};
   }
 
   ${rowWide(css`
@@ -388,10 +457,11 @@ export const FormTitleInput = styled.input`
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
-  padding: ${theme.spacing.xs} ${theme.spacing.sm};
-  font-size: ${theme.fonts.sizes.form};
-  line-height: 1.4;
-  min-height: 2.55rem;
+  height: ${formTitleHeight};
+  min-height: ${formTitleHeight};
+  padding: 0 ${theme.spacing.xs};
+  font-size: 14px;
+  line-height: 1.2;
   font-weight: ${theme.fonts.weights.normal};
   font-family: inherit;
   color: var(--text-primary);
@@ -404,8 +474,17 @@ export const FormTitleInput = styled.input`
   backdrop-filter: blur(10px);
   text-align: center;
 
+  ${tileWide(css`
+    height: ${tileHeaderControlSize};
+    min-height: ${tileHeaderControlSize};
+  `)}
+
   &.header {
+    height: auto;
     font-size: 1.8rem;
+    line-height: 1.4;
+    min-height: 2.55rem;
+    padding: ${theme.spacing.xs} ${theme.spacing.sm};
   }
 
   ${rowWide(css`
@@ -420,9 +499,9 @@ export const FormTitleInput = styled.input`
 `;
 
 export const RemoveButton = styled.button`
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
+  width: ${tileHeaderControlSize};
+  height: ${tileHeaderControlSize};
+  min-width: ${tileHeaderControlSize};
   padding: 0;
   position: relative;
   background: var(--surface-subtle);
@@ -438,11 +517,12 @@ export const RemoveButton = styled.button`
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 16px;
+    width: 14px;
     height: 1.5px;
     background: var(--text-secondary);
     border-radius: 1px;
     transition: background ${theme.transitions.fast};
+    transform-origin: center;
   }
 
   &::before {
@@ -476,12 +556,20 @@ export const RemoveButton = styled.button`
     display: none;
   }
 
+  ${tileWide(css`
+    &[data-placement="header"] {
+      width: ${tileHeaderControlSize};
+      height: ${tileHeaderControlSize};
+      min-width: ${tileHeaderControlSize};
+    }
+  `)}
+
   ${rowWide(css`
     &[data-placement="end"] {
       display: inline-block;
-      width: 26px;
-      height: 26px;
-      min-width: 26px;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
 
       &::before,
       &::after {
@@ -496,10 +584,10 @@ export const RemoveButton = styled.button`
 `;
 
 export const FormGroup = styled.div`
-  margin-bottom: ${theme.spacing.md};
+  margin-bottom: ${theme.spacing.sm};
   display: flex;
   flex-direction: column;
-  gap: ${theme.spacing.xs};
+  gap: 0.35rem;
 
   ${rowWide(css`
     margin-bottom: 0;
@@ -515,11 +603,11 @@ export const FormGroup = styled.div`
     ${narrowStacked(stackedRangeBox)}
   }
 
-  [data-layout="tile"] &:has(input[type="range"]) {
-    @media (min-width: calc(${theme.breakpoints.narrow} + 1px)) {
+  ${tileWide(css`
+    &:has(input[type="range"]) {
       min-height: ${tileSlotHeight};
     }
-  }
+  `)}
 
   [data-layout="row"] &:has(input[type="range"]) {
     @media (min-width: calc(${theme.breakpoints.rowStack} + 1px)) {
@@ -554,7 +642,7 @@ export const ColorPicker = styled(FormGroup)`
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
-  padding-top: ${theme.spacing.lg};
+  padding-top: ${theme.spacing.sm};
   margin-bottom: 0;
   position: relative;
 
@@ -572,8 +660,8 @@ export const ColorPicker = styled(FormGroup)`
 `;
 
 export const ColorSwatch = styled.button`
-  width: 45%;
-  height: 40px;
+  width: 42%;
+  height: 32px;
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.md};
   cursor: pointer;
@@ -661,7 +749,8 @@ export const HexInput = styled(HexColorInput)`
 
 export const FormLabel = styled.label`
   color: var(--text-secondary);
-  font-size: ${theme.fonts.sizes.label};
+  font-size: 0.82rem;
+  line-height: 1.2;
   font-weight: ${theme.fonts.weights.normal};
   text-transform: lowercase;
   letter-spacing: 0.02em;
@@ -688,10 +777,13 @@ export const Select = styled.select`
   background-position: right ${theme.spacing.sm} center;
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.md};
-  padding: 0.8rem ${theme.spacing.lg} 0.8rem ${theme.spacing.md};
+  width: 100%;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding: 0.55rem 1.6rem 0.55rem 0.7rem;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: ${theme.fonts.sizes.body};
+  font-size: ${theme.fonts.sizes.label};
   backdrop-filter: blur(10px);
   transition: ${theme.transitions.default};
   cursor: pointer;
@@ -716,6 +808,7 @@ export const Select = styled.select`
   ${rowWide(css`
     padding: 0.35rem ${theme.spacing.lg} 0.35rem ${theme.spacing.sm};
     font-size: ${theme.fonts.sizes.label};
+    width: auto;
     max-width: 65px;
   `)}
 
@@ -738,8 +831,8 @@ export const RangeInput = styled.input`
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     background: var(--range-thumb);
     border-radius: 50%;
     cursor: pointer;
@@ -753,8 +846,8 @@ export const RangeInput = styled.input`
   }
 
   &::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     background: var(--range-thumb);
     border-radius: 50%;
     cursor: pointer;
@@ -775,22 +868,23 @@ export const DeviceSelect = styled(Select)`
 
 export const SendButton = styled(BaseButton)`
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   min-width: 100px;
   font-weight: ${theme.fonts.weights.medium};
+  line-height: 1.2;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-top: ${theme.spacing.sm};
-  margin-bottom: calc(
-    ${theme.spacing.md} + ${theme.spacing.sm} - ${theme.spacing.lg}
-  );
+  margin-top: 0;
+  margin-bottom: ${theme.spacing.sm};
   align-self: center;
 
-  [data-layout="tile"] & {
-    @media (min-width: calc(${theme.breakpoints.narrow} + 1px)) {
-      height: ${tileSlotHeight};
-    }
-  }
+  ${tileWide(css`
+    height: ${tileSlotHeight};
+    padding: 0 ${theme.spacing.md};
+  `)}
 
   ${rowWide(css`
     margin-top: 0;
@@ -806,8 +900,6 @@ export const SendButton = styled(BaseButton)`
     ${stackedRangeBox}
     padding: 0 ${theme.spacing.md};
     font-size: ${theme.fonts.sizes.label};
-    display: flex;
-    align-items: center;
   `)}
 
   &.sent {
@@ -856,11 +948,24 @@ export const FooterText = styled.p`
 export const SelectRow = styled.div`
   display: contents;
 
+  ${tileWide(css`
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: ${theme.spacing.sm};
+    margin-bottom: ${theme.spacing.sm};
+  `)}
+
+  [data-layout="tile"] & > ${FormGroup} {
+    @media (min-width: ${aboveNarrow}) {
+      margin-bottom: 0;
+    }
+  }
+
   ${narrowStacked(css`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    gap: ${theme.spacing.md};
+    gap: ${theme.spacing.sm};
 
     & > * {
       flex: 0 1 auto;
