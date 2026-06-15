@@ -4,19 +4,18 @@ Consider Herald to be open source. There isn't anything proprietary or technical
 
 # Herald
 
-Herald is a control station for your MIDI-equipped guitar pedals. Pick a device, nudge some sliders, fire a program change, and save the whole setup as a preset for next time. 🎸
+Herald is a control station for your MIDI-equipped guitar pedals. Pick a device, nudge some sliders, fire a program change, and save the whole setup locally as a preset for next time.
 
 At its core, the app is built around blocks: small modules that _do a thing_.
-Blocks can send CC messages, which are often used to change individual
-parameters or settings, or PC messages, which are usually used for more 'advanced' things like saving and recalling presets. 🕺
+Blocks can send CC messages, which are often used to change individual parameters or settings, or PC messages, which are usually used for more 'advanced' things like saving and recalling presets.
 
 ## Use the Herald to:
 
-- Send CC and PC messages to your favorite MIDI gear. 📞
-- Customize the label and background color of each block. 🌈
-- Drag to reorder your blocks. 🔀
-- Switch between tile and strip layouts for the entire grid. 🏄‍♂️
-- Save and load presets, which contain _ALL_ of your blocks! 🧠
+- Send CC and PC messages to your favorite MIDI gear.
+- Customize the label and background color of each block.
+- Drag to reorder your blocks.
+- Switch between tile and strip layouts for the entire grid.
+- Save and load presets, which contain _ALL_ of your blocks!
 
 ## Quick Start
 
@@ -55,9 +54,7 @@ Use the layout button to switch between:
 - **Tile**: a grid of blocks. Think cards, thumbnails, etc.
 - **Strip**: a more compact row-style layout. Helpful for fitting a lot on your screen, especially at larger screen widths.
 
-On narrow screens, the app keeps things stacked so controls stay usable.
-
-You can have up to 75 blocks in total. This is probably too many blocks... but, hey, do your thing. 🔢
+On narrow screens, the app keeps things stacked so controls stay usable. You can have up to 75 blocks in total. This is probably too many blocks. But, hey, I'm not a cop.
 
 ## Presets
 
@@ -69,17 +66,18 @@ Presets are saved as JSON files. A preset includes:
 - PC block data.
 - Block order.
 
-Load saved files with **Load Preset**. The loader validates the shape of the preset
-file before applying it, so that you can't just load anything.
+Load saved files with **Load Preset**. The loader validates the shape of the preset file before applying it, so that you can't just load anything.
 
 ## Troubleshooting
 
 **No devices appear**
 
-Make sure the MIDI device or virtual port is connected before loading the app,
-then refresh the page. Also check that the browser has permission to use MIDI.
+Make sure the MIDI device or virtual port is connected before loading the app, then refresh the page. Also check that the browser has permission to use MIDI.
+
+Web MIDI is generally supported, but check caniuse for information on your browser: https://caniuse.com/midi
+
+^ Notably, Safari is excluded from this. A native iOS app may be a thing in the future.
 
 **Anything else**
 
-Contact me at james@jameslewis.io if anything is funky, and I will try to fix it
-ASAP. I have done my best to keep things smooth, but stuff happens. 🤷‍♂️😗
+Contact me at james@jameslewis.io if anything is funky, and I will try to fix it ASAP. I have done my best to keep things smooth, but stuff happens. 🤷‍♂️😗 Thanks and enjoy.
