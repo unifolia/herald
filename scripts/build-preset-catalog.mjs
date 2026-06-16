@@ -1,25 +1,21 @@
-// Run with: npm run build:presets
-// Source:   https://github.com/Morningstar-Engineering/openmidi
-
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync, readFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const SRC = join(here, "..", "data", "openmidi-all.json");
-const MAPPING = join(here, "..", "data", "openmidi-mapping.json");
-const OUT = join(here, "..", "src", "data", "presetCatalog.json");
+const ALL_URL =
+  "https://raw.githubusercontent.com/Morningstar-Engineering/openmidi/refs/heads/master/data/all.json";
+const MAPPING_URL =
+  "https://raw.githubusercontent.com/Morningstar-Engineering/openmidi/refs/heads/master/data/mapping.json";
 
-const raw = JSON.parse(readFileSync(SRC, "utf8"));
-const mapping = JSON.parse(readFileSync(MAPPING, "utf8"));
-const brandNames = new Map();
-const modelNames = new Map();
-for (const brand of mapping.brands ?? []) {
-  brandNames.set(brand.value, brand.name);
-  for (const model of brand.models ?? []) {
-    modelNames.set(`${brand.value}/${model.value}`, model.name);
-  }
-}
+const here = dirname(fileURLToPath(import.meta.url));
+const OUT_DIR = join(here, "..", "public");
+const OUT = join(OUT_DIR, "presetCatalog.json");
+
+const fetchJson = async (url) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${url} -> ${res.status} ${res.statusText}`);
+  return res.json();
+};
 
 const toCcNumber = (value) => {
   if (typeof value === "number") {
@@ -31,6 +27,27 @@ const toCcNumber = (value) => {
   }
   return null;
 };
+
+const sortKeys = (obj) =>
+  Object.fromEntries(
+    Object.entries(obj).sort(([a], [b]) =>
+      a.localeCompare(b, undefined, { sensitivity: "base" }),
+    ),
+  );
+
+const [raw, mapping] = await Promise.all([
+  fetchJson(ALL_URL),
+  fetchJson(MAPPING_URL),
+]);
+
+const brandNames = new Map();
+const modelNames = new Map();
+for (const brand of mapping.brands ?? []) {
+  brandNames.set(brand.value, brand.name);
+  for (const model of brand.models ?? []) {
+    modelNames.set(`${brand.value}/${model.value}`, model.name);
+  }
+}
 
 const catalog = {};
 let deviceCount = 0;
@@ -77,18 +94,12 @@ for (const [manufacturer, devices] of Object.entries(raw)) {
   }
 }
 
-const sortKeys = (obj) =>
-  Object.fromEntries(
-    Object.entries(obj).sort(([a], [b]) =>
-      a.localeCompare(b, undefined, { sensitivity: "base" }),
-    ),
-  );
-
 const sorted = sortKeys(catalog);
 for (const brand of Object.keys(sorted)) {
   sorted[brand] = sortKeys(sorted[brand]);
 }
 
+mkdirSync(OUT_DIR, { recursive: true });
 writeFileSync(OUT, JSON.stringify(sorted) + "\n");
 
 const bytes = readFileSync(OUT).length;

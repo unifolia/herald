@@ -15,7 +15,7 @@ import {
   NavButton,
 } from "../styles/components";
 import {
-  loadPresetCatalog,
+  fetchPresetCatalog,
   translateDevice,
   type PresetCatalog,
 } from "../util/translatePreset";
@@ -44,22 +44,24 @@ const PresetBrowser = ({
   onUploadFile,
 }: PresetBrowserProps) => {
   const [catalog, setCatalog] = useState<PresetCatalog | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "failed">(
+    "idle",
+  );
   const [brand, setBrand] = useState("");
   const [device, setDevice] = useState("");
 
   const cardRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    let active = true;
-    loadPresetCatalog()
-      .then((data) => active && setCatalog(data))
-      .catch(() => active && setFailed(true));
-    return () => {
-      active = false;
-    };
-  }, []);
+  const handlePullData = () => {
+    setStatus("loading");
+    fetchPresetCatalog()
+      .then((data) => {
+        setCatalog(data);
+        setStatus("ready");
+      })
+      .catch(() => setStatus("failed"));
+  };
 
   // Move focus into the dialog on open and restore it to the trigger on close.
   useEffect(() => {
@@ -165,17 +167,19 @@ const PresetBrowser = ({
         <ModalDivider>or</ModalDivider>
 
         <ModalSection>
-          <ModalSectionTitle>use a premade one</ModalSectionTitle>
+          <ModalSectionTitle>use a premade one (beta)</ModalSectionTitle>
           <ModalHint>
             thanks to Morningstar Engineering's{" "}
             <a href="https://www.openmidi.com/">openMIDI</a> project
           </ModalHint>
-          {failed ? (
-            <ModalHint>
-              couldn&apos;t load the device list. Try again.
-            </ModalHint>
-          ) : !catalog ? (
+          {status === "idle" ? (
+            <NavButton type="button" onClick={handlePullData}>
+              pull data
+            </NavButton>
+          ) : status === "loading" ? (
             <ModalHint>loading device list…</ModalHint>
+          ) : status === "failed" ? (
+            <ModalHint>*openMIDI presets are currently unavailable*</ModalHint>
           ) : (
             <>
               <ModalField>
