@@ -132,23 +132,6 @@ export const NavButton = styled(BaseButton)`
   min-width: 100px;
 `;
 
-export const LoadButton = styled(NavButton).attrs({ as: "label" })`
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  input {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    opacity: 0;
-    top: 0;
-    left: 0;
-    cursor: pointer;
-  }
-`;
-
 export const LayoutButton = styled(NavButton)`
   @media (max-width: ${theme.breakpoints.narrow}) {
     display: none;
@@ -925,4 +908,129 @@ export const SelectRow = styled.div`
       min-width: 0;
     }
   `)}
+`;
+
+// Load Preset modal
+export const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${theme.spacing.md};
+  background: rgba(7, 5, 3, 0.55);
+  backdrop-filter: blur(4px);
+`;
+
+export const ModalCard = styled.div`
+  width: 100%;
+  max-width: 460px;
+  max-height: calc(100vh - 2 * ${theme.spacing.xl});
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: ${theme.spacing.lg};
+  padding: ${theme.spacing.lg};
+  background: var(--surface-popover);
+  border: 1px solid var(--surface-glass-border);
+  border-radius: ${theme.borderRadius.lg};
+  box-shadow: var(--shadow-glass-hover);
+`;
+
+export const ModalHeader = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+`;
+
+export const ModalTitle = styled.h2`
+  margin: 0;
+  text-align: center;
+  font-size: ${theme.fonts.sizes.h2};
+  font-weight: ${theme.fonts.weights.thin};
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+  background: var(--text-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: var(--shadow-text-glow);
+`;
+
+export const ModalCloseButton = styled(RemoveButton)`
+  position: absolute;
+  top: 0;
+  right: 0;
+`;
+
+export const ModalSection = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: ${theme.spacing.sm};
+`;
+
+export const ModalSectionTitle = styled.h3`
+  margin: 0;
+  font-size: ${theme.fonts.sizes.form};
+  font-weight: ${theme.fonts.weights.medium};
+`;
+
+export const ModalHint = styled.p`
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: ${theme.fonts.sizes.label};
+`;
+
+export const ModalDivider = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.sm};
+  color: var(--text-secondary);
+  font-size: ${theme.fonts.sizes.label};
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--surface-glass-border);
+  }
+`;
+
+export const ModalField = styled.label`
+  display: flex;
+  flex-direction: column;
+  gap: ${theme.spacing.xs};
+  font-size: ${theme.fonts.sizes.label};
+  color: var(--text-secondary);
+`;
+
+export const ModalSelect = styled(Select)`
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+`;
+
+export const ModalUploadButton = styled(NavButton).attrs({ as: "label" })`
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+
+  input {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+  }
 `;
