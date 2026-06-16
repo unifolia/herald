@@ -16,6 +16,7 @@ import {
 } from "../styles/components";
 import {
   fetchPresetCatalog,
+  getCachedPresetCatalog,
   translateDevice,
   type PresetCatalog,
 } from "../util/translatePreset";
@@ -29,8 +30,6 @@ interface PresetBrowserProps {
   onUploadFile: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
-// Combine brand + device into a single preset name without repeating the brand
-// when the device name already includes it (e.g. "Chase Bliss" / "Mood MkII").
 const presetName = (brand: string, device: string) =>
   device.toLowerCase().includes(brand.toLowerCase())
     ? device
@@ -43,9 +42,11 @@ const PresetBrowser = ({
   onLoadPreset,
   onUploadFile,
 }: PresetBrowserProps) => {
-  const [catalog, setCatalog] = useState<PresetCatalog | null>(null);
+  const [catalog, setCatalog] = useState<PresetCatalog | null>(
+    getCachedPresetCatalog,
+  );
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "failed">(
-    "idle",
+    () => (getCachedPresetCatalog() ? "ready" : "idle"),
   );
   const [brand, setBrand] = useState("");
   const [device, setDevice] = useState("");
@@ -63,14 +64,12 @@ const PresetBrowser = ({
       .catch(() => setStatus("failed"));
   };
 
-  // Move focus into the dialog on open and restore it to the trigger on close.
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null;
     closeRef.current?.focus();
     return () => previouslyFocused?.focus?.();
   }, []);
 
-  // Close on Escape, and trap Tab focus within the dialog.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {

@@ -22,6 +22,9 @@ export interface TranslateResult {
 const CATALOG_URL = `${import.meta.env.BASE_URL}presetCatalog.json`;
 
 let catalogPromise: Promise<PresetCatalog> | null = null;
+let cachedCatalog: PresetCatalog | null = null;
+
+export const getCachedPresetCatalog = (): PresetCatalog | null => cachedCatalog;
 
 export const fetchPresetCatalog = (): Promise<PresetCatalog> => {
   if (!catalogPromise) {
@@ -29,6 +32,10 @@ export const fetchPresetCatalog = (): Promise<PresetCatalog> => {
       .then((res) => {
         if (!res.ok) throw new Error(`presetCatalog.json: ${res.status}`);
         return res.json() as Promise<PresetCatalog>;
+      })
+      .then((data) => {
+        cachedCatalog = data;
+        return data;
       })
       .catch((error) => {
         catalogPromise = null;
