@@ -27,7 +27,7 @@ import {
 } from "./util/theme";
 import type { Layout, ColorScheme } from "./types";
 
-const MAX_BLOCKS = 75;
+const MAX_BLOCKS = 127;
 
 const App = () => {
   const [colorScheme, setColorScheme] = useState<ColorScheme>(
@@ -42,6 +42,7 @@ const App = () => {
     forms,
     pcForms,
     formOrder,
+    globalMidiChannel,
     allItems,
     allFormsById,
     handleIncomingCC,
@@ -52,6 +53,7 @@ const App = () => {
     updateCCFormField,
     updatePCFormField,
     handleReorder,
+    handleGlobalMidiChannelChange,
     setPresetName,
     setPresetState,
   } = usePresetBlocks(initialBackgroundColor, MAX_BLOCKS);
@@ -130,6 +132,8 @@ const App = () => {
             handleAddPCInput={handleAddPCInput}
             savePreset={savePreset}
             openLoadPreset={() => setIsLoadModalOpen(true)}
+            globalMidiChannel={globalMidiChannel}
+            handleGlobalMidiChannelChange={handleGlobalMidiChannelChange}
             layout={layout}
             onToggleLayout={toggleLayout}
           />

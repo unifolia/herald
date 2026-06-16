@@ -81,7 +81,6 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
 
   useEffect(() => {
     if (!navigator.requestMIDIAccess) {
-      console.error("MIDI is not supported on this browser :(");
       return;
     }
 
@@ -101,7 +100,7 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
           attachInputListeners(midiAccess);
         };
       },
-      () => console.error("Failed to access MIDI devices."),
+      () => {},
     );
 
     return () => {

@@ -42,6 +42,9 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     INITIAL_CC_ID,
     INITIAL_PC_ID,
   ]);
+  const [globalMidiChannel, setGlobalMidiChannel] = useState<number | null>(
+    null,
+  );
   const nextIdRef = useRef(INITIAL_CC_ID + 1);
   const nextPcIdRef = useRef(INITIAL_PC_ID - 1);
 
@@ -88,6 +91,23 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
         .map((id) => prev.find((form) => form.id === id)!),
     );
   }, []);
+
+  const handleGlobalMidiChannelChange = useCallback(
+    (newGlobalChannel: number) => {
+      setGlobalMidiChannel(newGlobalChannel);
+      setForms((prev) => ({
+        ...prev,
+        inputs: prev.inputs.map((form) => ({
+          ...form,
+          midiChannel: newGlobalChannel,
+        })),
+      }));
+      setPcForms((prev) =>
+        prev.map((pc) => ({ ...pc, midiChannel: newGlobalChannel })),
+      );
+    },
+    [],
+  );
 
   const getInheritedBlockDefaults = useCallback(() => {
     for (let i = formOrder.length - 1; i >= 0; i--) {
@@ -195,6 +215,7 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     forms,
     pcForms,
     formOrder,
+    globalMidiChannel,
     blockCount,
     allItems,
     allFormsById,
@@ -206,6 +227,7 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     updateCCFormField,
     updatePCFormField,
     handleReorder,
+    handleGlobalMidiChannelChange,
     setPresetName,
     setPresetState,
   };

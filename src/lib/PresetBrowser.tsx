@@ -169,7 +169,7 @@ const PresetBrowser = ({
           <ModalSectionTitle>use a premade one (beta)</ModalSectionTitle>
           <ModalHint>
             thanks to Morningstar Engineering's{" "}
-            <a href="https://www.openmidi.com/">openMIDI</a> project
+            <a href="https://www.openmidi.com/">openMIDI</a>&nbsp;project
           </ModalHint>
           {status === "idle" ? (
             <NavButton type="button" onClick={handlePullData}>

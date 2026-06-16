@@ -4,9 +4,18 @@ import { theme } from "./theme";
 import { BaseButton } from "./GlobalStyles";
 import type { Layout } from "../types";
 
+// Media query boundaries. Each breakpoint has a single transition point:
+// `from(bp)` matches at the breakpoint and wider; `below(bp)` matches strictly
+// narrower. The 0.02px offset keeps the two mutually exclusive without leaving
+// a fractional-pixel dead zone (e.g. at 1080.5px under browser zoom / HiDPI),
+// so always pair `from`/`below` on the same breakpoint rather than hand-writing
+// `min-width`/`max-width` with a `+1px` offset.
+const from = (bp: string) => `@media (min-width: ${bp})`;
+const below = (bp: string) => `@media (max-width: calc(${bp} - 0.02px))`;
+
 const rowWide = (styles: ReturnType<typeof css>) => css`
   [data-layout="row"] & {
-    @media (min-width: calc(${theme.breakpoints.rowStack} + 1px)) {
+    ${from(theme.breakpoints.rowStack)} {
       ${styles}
     }
   }
@@ -14,17 +23,15 @@ const rowWide = (styles: ReturnType<typeof css>) => css`
 
 const rowWideSelf = (styles: ReturnType<typeof css>) => css`
   &[data-layout="row"] {
-    @media (min-width: calc(${theme.breakpoints.rowStack} + 1px)) {
+    ${from(theme.breakpoints.rowStack)} {
       ${styles}
     }
   }
 `;
 
-const aboveNarrow = `calc(${theme.breakpoints.narrow} + 1px)`;
-
 const tileWide = (styles: ReturnType<typeof css>) => css`
   [data-layout="tile"] & {
-    @media (min-width: ${aboveNarrow}) {
+    ${from(theme.breakpoints.narrow)} {
       ${styles}
     }
   }
@@ -32,31 +39,31 @@ const tileWide = (styles: ReturnType<typeof css>) => css`
 
 const tileWideSelf = (styles: ReturnType<typeof css>) => css`
   &[data-layout="tile"] {
-    @media (min-width: ${aboveNarrow}) {
+    ${from(theme.breakpoints.narrow)} {
       ${styles}
     }
   }
 `;
 
 const narrowStacked = (styles: ReturnType<typeof css>) => css`
-  @media (max-width: ${theme.breakpoints.narrow}) {
+  ${below(theme.breakpoints.narrow)} {
     ${styles}
   }
 
   [data-layout="row"] & {
-    @media (max-width: ${theme.breakpoints.rowStack}) {
+    ${below(theme.breakpoints.rowStack)} {
       ${styles}
     }
   }
 `;
 
 const narrowStackedSelf = (styles: ReturnType<typeof css>) => css`
-  @media (max-width: ${theme.breakpoints.narrow}) {
+  ${below(theme.breakpoints.narrow)} {
     ${styles}
   }
 
   &[data-layout="row"] {
-    @media (max-width: ${theme.breakpoints.rowStack}) {
+    ${below(theme.breakpoints.rowStack)} {
       ${styles}
     }
   }
@@ -103,7 +110,6 @@ const stackedRangeBox = css`
 `;
 
 const tileColumnBreakpoints = {
-  two: aboveNarrow,
   three: "858px",
   four: "1128px",
 } as const;
@@ -120,7 +126,7 @@ export const NavBar = styled.nav`
   border-radius: ${theme.borderRadius.lg};
   box-shadow: var(--shadow-nav);
 
-  @media (max-width: ${theme.breakpoints.rowStack}) {
+  ${below(theme.breakpoints.rowStack)} {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -133,9 +139,16 @@ export const NavButton = styled(BaseButton)`
 `;
 
 export const LayoutButton = styled(NavButton)`
-  @media (max-width: ${theme.breakpoints.narrow}) {
+  ${below(theme.breakpoints.narrow)} {
     display: none;
   }
+`;
+
+export const GlobalChannelContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${theme.spacing.sm};
 `;
 
 export const ThemeToggleButton = styled(BaseButton)`
@@ -157,11 +170,11 @@ export const FormsContainer = styled.div<{ $layout?: Layout }>`
           flex-direction: column;
           gap: 5px;
 
-          @media (max-width: ${theme.breakpoints.rowStack}) {
+          ${below(theme.breakpoints.rowStack)} {
             gap: ${theme.spacing.lg};
           }
 
-          @media (min-width: ${theme.breakpoints.huge}) {
+          ${from(theme.breakpoints.huge)} {
             flex-direction: row;
             flex-wrap: wrap;
 
@@ -179,27 +192,27 @@ export const FormsContainer = styled.div<{ $layout?: Layout }>`
           gap: ${theme.spacing.md};
           justify-content: start;
 
-          @media (max-width: ${theme.breakpoints.narrow}) {
+          ${below(theme.breakpoints.narrow)} {
             gap: ${theme.spacing.lg};
           }
 
-          @media (min-width: ${tileColumnBreakpoints.two}) {
+          ${from(theme.breakpoints.narrow)} {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
-          @media (min-width: ${tileColumnBreakpoints.three}) {
+          ${from(tileColumnBreakpoints.three)} {
             grid-template-columns: repeat(3, minmax(0, 1fr));
           }
 
-          @media (min-width: ${tileColumnBreakpoints.four}) {
+          ${from(tileColumnBreakpoints.four)} {
             grid-template-columns: repeat(4, minmax(0, 1fr));
           }
 
-          @media (min-width: ${theme.breakpoints.big}) {
+          ${from(theme.breakpoints.big)} {
             grid-template-columns: repeat(6, minmax(0, 1fr));
           }
 
-          @media (min-width: ${theme.breakpoints.huge}) {
+          ${from(theme.breakpoints.huge)} {
             grid-template-columns: repeat(8, minmax(0, 1fr));
           }
         `}
@@ -410,7 +423,7 @@ export const FormTitleDisplay = styled.h3`
     width: 250px;
     box-sizing: border-box;
 
-    @media (min-width: ${theme.breakpoints.huge}) {
+    ${from(theme.breakpoints.huge)} {
       flex-basis: 150px;
       width: 150px;
     }
@@ -452,7 +465,7 @@ export const FormTitleInput = styled.input`
     flex: 0 0 250px;
     width: 250px;
 
-    @media (min-width: ${theme.breakpoints.huge}) {
+    ${from(theme.breakpoints.huge)} {
       flex-basis: 150px;
       width: 150px;
     }
@@ -482,7 +495,7 @@ export const RemoveButton = styled.button`
     height: 1.5px;
     background: var(--text-secondary);
     border-radius: 1px;
-    transition: background ${theme.transitions.fast};
+    transition: background ${theme.transitions.default};
     transform-origin: center;
   }
 
@@ -555,23 +568,23 @@ export const FormGroup = styled.div`
   `)}
 
   [data-layout="row"] &:has(input[type="range"]) {
-    @media (min-width: calc(${theme.breakpoints.rowStack} + 1px)) {
+    ${from(theme.breakpoints.rowStack)} {
       min-width: 140px;
     }
   }
 
   [data-layout="row"] &:has(select) {
-    @media (min-width: calc(${theme.breakpoints.rowStack} + 1px)) {
+    ${from(theme.breakpoints.rowStack)} {
       ${inlineSelectWide}
     }
 
-    @media (max-width: ${theme.breakpoints.rowStack}) {
+    ${below(theme.breakpoints.rowStack)} {
       ${inlineSelectNarrow}
     }
   }
 
   &:has(select) {
-    @media (max-width: ${theme.breakpoints.narrow}) {
+    ${below(theme.breakpoints.narrow)} {
       ${inlineSelectNarrow}
     }
   }
@@ -721,7 +734,6 @@ export const Select = styled.select`
   font-family: inherit;
   font-size: ${theme.fonts.sizes.label};
   backdrop-filter: blur(10px);
-  transition: ${theme.transitions.default};
   cursor: pointer;
 
   &:hover {
@@ -744,8 +756,7 @@ export const Select = styled.select`
   ${rowWide(css`
     padding: 0.35rem ${theme.spacing.lg} 0.35rem ${theme.spacing.sm};
     font-size: ${theme.fonts.sizes.label};
-    width: auto;
-    max-width: 65px;
+    width: 65px;
   `)}
 
   ${narrowStacked(css`
@@ -773,7 +784,7 @@ export const RangeInput = styled.input`
     border-radius: 50%;
     cursor: pointer;
     box-shadow: var(--shadow-range-thumb);
-    transition: ${theme.transitions.fast};
+    transition: ${theme.transitions.default};
 
     &:hover {
       transform: scale(1.1);
@@ -789,7 +800,7 @@ export const RangeInput = styled.input`
     cursor: pointer;
     border: none;
     box-shadow: var(--shadow-range-thumb);
-    transition: ${theme.transitions.fast};
+    transition: ${theme.transitions.default};
 
     &:hover {
       transform: scale(1.1);
@@ -800,6 +811,33 @@ export const RangeInput = styled.input`
 
 export const DeviceSelect = styled(Select)`
   min-width: 80px;
+`;
+
+export const GlobalChannelLabel = styled(FormLabel)`
+  font-size: ${theme.fonts.sizes.body};
+  color: var(--text-primary);
+  white-space: nowrap;
+
+  &::before {
+    display: none;
+  }
+`;
+
+export const GlobalChannelSelect = styled(Select)`
+  align-self: stretch;
+  min-width: 80px;
+
+  ${below(theme.breakpoints.rowStack)} {
+    min-height: 0;
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+    font-size: ${theme.fonts.sizes.body};
+  }
+
+  ${from(theme.breakpoints.rowStack)} {
+    width: 65px;
+    min-width: 0;
+  }
 `;
 
 export const SendButton = styled(BaseButton)`
@@ -892,7 +930,7 @@ export const SelectRow = styled.div`
   `)}
 
   [data-layout="tile"] & > ${FormGroup} {
-    @media (min-width: ${aboveNarrow}) {
+    ${from(theme.breakpoints.narrow)} {
       margin-bottom: 0;
     }
   }
@@ -984,6 +1022,16 @@ export const ModalHint = styled.p`
   font-size: ${theme.fonts.sizes.label};
 `;
 
+export const ModalMessage = styled(ModalHint)`
+  text-align: center;
+  margin-bottom: 1rem;
+`;
+
+export const ConfirmModalMessage = styled(ModalMessage)`
+  font-size: 1.25rem;
+  font-weight: 500;
+`;
+
 export const ModalDivider = styled.div`
   display: flex;
   align-items: center;
@@ -1033,4 +1081,10 @@ export const ModalUploadButton = styled(NavButton).attrs({ as: "label" })`
     left: 0;
     cursor: pointer;
   }
+`;
+
+export const ModalActions = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: ${theme.spacing.md};
 `;

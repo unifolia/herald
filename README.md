@@ -54,7 +54,7 @@ Use the layout button to switch between:
 - **Tile**: a grid of blocks. Think cards, thumbnails, etc.
 - **Strip**: a more compact row-style layout. Helpful for fitting a lot on your screen, especially at larger screen widths.
 
-On narrow screens, the app keeps things stacked so controls stay usable. You can have up to 75 blocks in total. This is probably too many blocks. But, hey, I'm not a cop.
+On narrow screens, the app keeps things stacked so controls stay usable. You can have up to 128 blocks in total. This is probably too many blocks. But, hey, I'm not a cop.
 
 ## Presets
 
