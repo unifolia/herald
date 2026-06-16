@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import {
   ModalOverlay,
   ModalCard,
@@ -87,7 +81,9 @@ const PresetBrowser = ({
         cardRef.current.querySelectorAll<HTMLElement>(
           'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])',
         ),
-      ).filter((el) => !el.hasAttribute("disabled") && el.offsetParent !== null);
+      ).filter(
+        (el) => !el.hasAttribute("disabled") && el.offsetParent !== null,
+      );
       if (focusable.length === 0) return;
 
       const first = focusable[0];
@@ -170,6 +166,10 @@ const PresetBrowser = ({
 
         <ModalSection>
           <ModalSectionTitle>use a premade one</ModalSectionTitle>
+          <ModalHint>
+            thanks to Morningstar Engineering's{" "}
+            <a href="https://www.openmidi.com/">openMIDI</a> project
+          </ModalHint>
           {failed ? (
             <ModalHint>
               couldn&apos;t load the device list. Try again.
@@ -204,7 +204,7 @@ const PresetBrowser = ({
                   onChange={(e) => setDevice(e.target.value)}
                 >
                   <option value="">
-                    {brand ? "select device…" : "select a brand first"}
+                    {brand ? "select device…" : "select a brand first…"}
                   </option>
                   {devices.map((d) => (
                     <option key={d} value={d}>
