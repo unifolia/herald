@@ -19,13 +19,21 @@ export interface TranslateResult {
   truncated: number;
 }
 
+const CATALOG_URL = `${import.meta.env.BASE_URL}presetCatalog.json`;
+
 let catalogPromise: Promise<PresetCatalog> | null = null;
 
-export const loadPresetCatalog = (): Promise<PresetCatalog> => {
+export const fetchPresetCatalog = (): Promise<PresetCatalog> => {
   if (!catalogPromise) {
-    catalogPromise = import("../data/presetCatalog.json").then(
-      (module) => module.default as PresetCatalog,
-    );
+    catalogPromise = fetch(CATALOG_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error(`presetCatalog.json: ${res.status}`);
+        return res.json() as Promise<PresetCatalog>;
+      })
+      .catch((error) => {
+        catalogPromise = null;
+        throw error;
+      });
   }
   return catalogPromise;
 };
