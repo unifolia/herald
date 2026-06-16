@@ -23,12 +23,13 @@ jobs:
 
       - name: Commit if changed
         run: |
-          if git diff --quiet -- public/presetCatalog.json; then
+          git add public/presetCatalog.json
+          # --cached catches new/untracked files too (git diff alone ignores them).
+          if git diff --cached --quiet; then
             echo "Catalog unchanged — nothing to commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/presetCatalog.json
           git commit -m "chore: refresh openMIDI preset catalog"
           git push
