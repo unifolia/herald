@@ -811,6 +811,10 @@ export const RangeInput = styled.input`
 
 export const DeviceSelect = styled(Select)`
   min-width: 80px;
+  max-width: 316px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const GlobalChannelLabel = styled(FormLabel)`
@@ -904,6 +908,10 @@ export const DeviceContainer = styled.div`
   justify-content: center;
   gap: ${theme.spacing.xs};
   margin-bottom: ${theme.spacing.md};
+
+  ${below(theme.breakpoints.rowStack)} {
+    flex-direction: column;
+  }
 `;
 
 export const DeviceHeading = styled.h2`
