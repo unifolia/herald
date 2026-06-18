@@ -138,6 +138,22 @@ export const NavButton = styled(BaseButton)`
   min-width: 100px;
 `;
 
+export const AdvancedModeButton = styled(NavButton)`
+  &[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: var(--surface-hover-strong);
+    box-shadow: var(--shadow-button);
+    color: var(--text-primary);
+  }
+
+  &[aria-pressed="true"]:hover {
+    border-color: var(--remove-hover);
+    background: var(--surface-hover-strong);
+    box-shadow: var(--shadow-button);
+    color: var(--remove-hover);
+  }
+`;
+
 export const LayoutButton = styled(NavButton)`
   ${below(theme.breakpoints.narrow)} {
     display: none;
@@ -970,7 +986,9 @@ export const ModalOverlay = styled.div`
 `;
 
 export const ModalCard = styled.div`
+  box-sizing: border-box;
   width: 100%;
+  min-width: calc(380px - 2 * ${theme.spacing.md});
   max-width: 460px;
   max-height: calc(100vh - 2 * ${theme.spacing.xl});
   overflow-y: auto;
@@ -1095,4 +1113,11 @@ export const ModalActions = styled.div`
   display: flex;
   justify-content: center;
   gap: ${theme.spacing.md};
+`;
+
+export const AdvancedModalActions = styled(ModalActions)`
+  ${below(theme.breakpoints.narrow)} {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
