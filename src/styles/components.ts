@@ -1116,8 +1116,6 @@ export const ModalActions = styled.div`
 `;
 
 export const AdvancedModalActions = styled(ModalActions)`
-  ${below(theme.breakpoints.narrow)} {
-    flex-direction: column;
-    align-items: stretch;
-  }
+  flex-direction: column;
+  align-items: stretch;
 `;

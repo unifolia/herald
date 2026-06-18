@@ -10,6 +10,7 @@ import {
   AdvancedModalActions,
   NavButton,
   AdvancedModeButton,
+  ModalSectionTitle,
 } from "../styles/components";
 
 interface AdvancedModalProps {
@@ -93,11 +94,9 @@ const AdvancedModal = ({
           />
         </ModalHeader>
         <ModalSection>
+          <ModalSectionTitle>Transformers</ModalSectionTitle>
           <AdvancedModalActions>
-            <NavButton
-              type="button"
-              onClick={() => runAndClose(onRandomize)}
-            >
+            <NavButton type="button" onClick={() => runAndClose(onRandomize)}>
               Randomize
             </NavButton>
             <AdvancedModeButton
