@@ -20,6 +20,7 @@ export interface TranslateResult {
 }
 
 const CATALOG_URL = `${import.meta.env.BASE_URL}presetCatalog.json`;
+const CATALOG_TIMEOUT_MS = 3000;
 
 let catalogPromise: Promise<PresetCatalog> | null = null;
 let cachedCatalog: PresetCatalog | null = null;
@@ -28,7 +29,10 @@ export const getCachedPresetCatalog = (): PresetCatalog | null => cachedCatalog;
 
 export const fetchPresetCatalog = (): Promise<PresetCatalog> => {
   if (!catalogPromise) {
-    catalogPromise = fetch(CATALOG_URL)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), CATALOG_TIMEOUT_MS);
+
+    catalogPromise = fetch(CATALOG_URL, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`presetCatalog.json: ${res.status}`);
         return res.json() as Promise<PresetCatalog>;
@@ -40,7 +44,8 @@ export const fetchPresetCatalog = (): Promise<PresetCatalog> => {
       .catch((error) => {
         catalogPromise = null;
         throw error;
-      });
+      })
+      .finally(() => clearTimeout(timeout));
   }
   return catalogPromise;
 };

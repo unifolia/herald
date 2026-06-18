@@ -56,7 +56,7 @@ const Navigation = ({
         aria-pressed={layout === "row"}
         aria-label={`Layout: ${layout}. Click to toggle.`}
       >
-        {layout === "tile" ? "Tile" : "Strip"}
+        Layout
       </LayoutButton>
       <NavButton type="button" onClick={() => setIsAdvancedOpen(true)}>
         Advanced

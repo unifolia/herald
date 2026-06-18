@@ -424,10 +424,30 @@ const useDragReorder = (
     window.addEventListener("blur", onWindowBlur);
   }, []);
 
+  const moveItem = useCallback((id: number, direction: -1 | 1) => {
+    if (dragActiveRef.current) return;
+
+    const currentOrder = orderedIdsRef.current;
+    const index = currentOrder.indexOf(id);
+    if (index === -1) return;
+
+    const target = index + direction;
+    if (target < 0 || target >= currentOrder.length) return;
+
+    const newOrder = [...currentOrder];
+    [newOrder[index], newOrder[target]] = [newOrder[target], newOrder[index]];
+
+    snapshotRects();
+    orderedIdsRef.current = newOrder;
+    setOrderedIds(newOrder);
+    onCommitRef.current(newOrder);
+  }, []);
+
   return {
     orderedIds,
     draggedId,
     handlePointerDown,
+    moveItem,
     registerRef,
     containerRef,
   };

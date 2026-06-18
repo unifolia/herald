@@ -2,8 +2,7 @@ name: Pull openMIDI data
 
 on:
   schedule:
-    # Mondays at 06:00 UTC
-    - cron: "0 6 * * 1"
+    - cron: "0 0 1 * *"
   workflow_dispatch: {} # allow manual runs from the Actions tab
 
 jobs:
@@ -31,5 +30,5 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "action: pull openMIDI preset catalog :alembic:"
+          git commit -m ":alembic: pull openMIDI preset catalog (i'm a bot btw)"
           git push

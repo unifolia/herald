@@ -79,17 +79,21 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
 
   const handleReorder = useCallback((reorderedIds: number[]) => {
     setFormOrder(reorderedIds);
-    setForms((prev) => ({
-      ...prev,
-      inputs: reorderedIds
-        .filter((id) => prev.inputs.some((form) => form.id === id))
-        .map((id) => prev.inputs.find((form) => form.id === id)!),
-    }));
-    setPcForms((prev) =>
-      reorderedIds
-        .filter((id) => prev.some((form) => form.id === id))
-        .map((id) => prev.find((form) => form.id === id)!),
-    );
+    setForms((prev) => {
+      const byId = new Map(prev.inputs.map((form) => [form.id, form]));
+      return {
+        ...prev,
+        inputs: reorderedIds
+          .map((id) => byId.get(id))
+          .filter((form): form is MidiCCFormData => form !== undefined),
+      };
+    });
+    setPcForms((prev) => {
+      const byId = new Map(prev.map((form) => [form.id, form]));
+      return reorderedIds
+        .map((id) => byId.get(id))
+        .filter((form): form is MidiPCFormData => form !== undefined);
+    });
   }, []);
 
   const handleGlobalMidiChannelChange = useCallback(

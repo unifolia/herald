@@ -1037,25 +1037,17 @@ export const ModalSection = styled.section`
 `;
 
 export const ModalSectionTitle = styled.h3`
-  margin: 0;
+  margin: 0 0 0.5rem;
+  text-align: center;
   font-size: ${theme.fonts.sizes.form};
   font-weight: ${theme.fonts.weights.medium};
 `;
 
 export const ModalHint = styled.p`
   margin: 0;
+  text-align: center;
   color: var(--text-secondary);
   font-size: ${theme.fonts.sizes.label};
-`;
-
-export const ModalMessage = styled(ModalHint)`
-  text-align: center;
-  margin-bottom: 1rem;
-`;
-
-export const ConfirmModalMessage = styled(ModalMessage)`
-  font-size: 1.25rem;
-  font-weight: 500;
 `;
 
 export const ModalDivider = styled.div`
