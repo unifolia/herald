@@ -138,6 +138,22 @@ export const NavButton = styled(BaseButton)`
   min-width: 100px;
 `;
 
+export const AdvancedModeButton = styled(NavButton)`
+  &[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: var(--surface-hover-strong);
+    box-shadow: var(--shadow-button);
+    color: var(--text-primary);
+  }
+
+  &[aria-pressed="true"]:hover {
+    border-color: var(--remove-hover);
+    background: var(--surface-hover-strong);
+    box-shadow: var(--shadow-button);
+    color: var(--remove-hover);
+  }
+`;
+
 export const LayoutButton = styled(NavButton)`
   ${below(theme.breakpoints.narrow)} {
     display: none;
@@ -970,7 +986,9 @@ export const ModalOverlay = styled.div`
 `;
 
 export const ModalCard = styled.div`
+  box-sizing: border-box;
   width: 100%;
+  min-width: calc(380px - 2 * ${theme.spacing.md});
   max-width: 460px;
   max-height: calc(100vh - 2 * ${theme.spacing.xl});
   overflow-y: auto;
@@ -1019,25 +1037,17 @@ export const ModalSection = styled.section`
 `;
 
 export const ModalSectionTitle = styled.h3`
-  margin: 0;
+  margin: 0 0 0.5rem;
+  text-align: center;
   font-size: ${theme.fonts.sizes.form};
   font-weight: ${theme.fonts.weights.medium};
 `;
 
 export const ModalHint = styled.p`
   margin: 0;
+  text-align: center;
   color: var(--text-secondary);
   font-size: ${theme.fonts.sizes.label};
-`;
-
-export const ModalMessage = styled(ModalHint)`
-  text-align: center;
-  margin-bottom: 1rem;
-`;
-
-export const ConfirmModalMessage = styled(ModalMessage)`
-  font-size: 1.25rem;
-  font-weight: 500;
 `;
 
 export const ModalDivider = styled.div`
@@ -1095,4 +1105,9 @@ export const ModalActions = styled.div`
   display: flex;
   justify-content: center;
   gap: ${theme.spacing.md};
+`;
+
+export const AdvancedModalActions = styled(ModalActions)`
+  flex-direction: column;
+  align-items: stretch;
 `;

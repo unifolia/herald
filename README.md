@@ -68,6 +68,12 @@ Presets are saved as JSON files. A preset includes:
 
 Load saved files with **Load Preset**. The loader validates the shape of the preset file before applying it, so that you can't just load anything.
 
+Built-in presets are scraped monthly from openMIDI, a community project driven by the good folks at Morningstar Engineering. See latest here: https://www.openmidi.com/
+
+## Advanced
+
+The 'Advanced' title is, admittedly, a slight misnomer. Advanced is an experimental section for the weird and the quirky. It currently comprises three modulators that randomize or gently shift block CC values.
+
 ## Troubleshooting
 
 **No devices appear**

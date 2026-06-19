@@ -43,6 +43,7 @@ interface MidiCCFormProps {
   sendCC: (channel: number, cc: number, value: number) => void;
   dragRef?: (el: HTMLElement | null) => void;
   onDragPointerDown?: (e: React.PointerEvent, id: number) => void;
+  onMove?: (id: number, direction: -1 | 1) => void;
   isDragging?: boolean;
   layout: Layout;
 }
@@ -60,11 +61,13 @@ const MidiCCForm = memo(
     sendCC,
     dragRef,
     onDragPointerDown,
+    onMove,
     isDragging,
     layout,
   }: MidiCCFormProps) => {
     const [isEditing, setIsEditing] = useState(false);
-    const { isPickerOpen, pickerRef, togglePicker } = useColorPicker();
+    const { isPickerOpen, pickerRef, swatchRef, togglePicker } =
+      useColorPicker();
 
     const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = Number(e.target.value);
@@ -84,6 +87,20 @@ const MidiCCForm = memo(
       [onDragPointerDown, id],
     );
 
+    const handleDragKeyDown = useCallback(
+      (e: React.KeyboardEvent) => {
+        if (!e.altKey) return;
+        if (e.key === "ArrowUp") {
+          e.preventDefault();
+          onMove?.(id, -1);
+        } else if (e.key === "ArrowDown") {
+          e.preventDefault();
+          onMove?.(id, 1);
+        }
+      },
+      [onMove, id],
+    );
+
     return (
       <MidiFormContainer
         ref={dragRef}
@@ -100,9 +117,10 @@ const MidiCCForm = memo(
             <DragHandleButton
               type="button"
               $dotColor={backgroundColor}
-              aria-label={`Drag ${label} to reorder`}
-              title="Drag to reorder"
+              aria-label={`Reorder ${label}. Drag, or use Alt with the arrow keys.`}
+              title="Drag to reorder (or Alt+↑/↓)"
               onPointerDown={handlePointerDown}
+              onKeyDown={handleDragKeyDown}
             />
             {isEditing ? (
               <FormTitleInput
@@ -196,10 +214,13 @@ const MidiCCForm = memo(
         <ColorPicker ref={pickerRef}>
           <FormLabel>Background:</FormLabel>
           <ColorSwatch
+            ref={swatchRef}
             type="button"
             style={{ background: backgroundColor }}
             onClick={togglePicker}
             aria-label="Choose background color"
+            aria-haspopup="dialog"
+            aria-expanded={isPickerOpen}
           />
           {isPickerOpen && (
             <ColorPopover>

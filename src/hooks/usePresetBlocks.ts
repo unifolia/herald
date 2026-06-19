@@ -79,17 +79,21 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
 
   const handleReorder = useCallback((reorderedIds: number[]) => {
     setFormOrder(reorderedIds);
-    setForms((prev) => ({
-      ...prev,
-      inputs: reorderedIds
-        .filter((id) => prev.inputs.some((form) => form.id === id))
-        .map((id) => prev.inputs.find((form) => form.id === id)!),
-    }));
-    setPcForms((prev) =>
-      reorderedIds
-        .filter((id) => prev.some((form) => form.id === id))
-        .map((id) => prev.find((form) => form.id === id)!),
-    );
+    setForms((prev) => {
+      const byId = new Map(prev.inputs.map((form) => [form.id, form]));
+      return {
+        ...prev,
+        inputs: reorderedIds
+          .map((id) => byId.get(id))
+          .filter((form): form is MidiCCFormData => form !== undefined),
+      };
+    });
+    setPcForms((prev) => {
+      const byId = new Map(prev.map((form) => [form.id, form]));
+      return reorderedIds
+        .map((id) => byId.get(id))
+        .filter((form): form is MidiPCFormData => form !== undefined);
+    });
   }, []);
 
   const handleGlobalMidiChannelChange = useCallback(
@@ -198,6 +202,35 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     [],
   );
 
+  const updateCCValues = useCallback((valuesById: Map<number, number>) => {
+    setForms((prev) => {
+      let changed = false;
+      const inputs = prev.inputs.map((form) => {
+        const value = valuesById.get(form.id);
+        if (value === undefined || value === form.value) return form;
+
+        changed = true;
+        return { ...form, value };
+      });
+
+      return changed ? { ...prev, inputs } : prev;
+    });
+  }, []);
+
+  const randomizeCCValues = useCallback(() => {
+    const randomizedInputs = forms.inputs.map((form) => ({
+      ...form,
+      value: Math.floor(Math.random() * 128),
+    }));
+
+    setForms((prev) => ({
+      ...prev,
+      inputs: randomizedInputs,
+    }));
+
+    return randomizedInputs;
+  }, [forms.inputs]);
+
   const setPresetName = useCallback((name: string) => {
     setForms((prev) => ({ ...prev, name }));
   }, []);
@@ -226,6 +259,8 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     handleRemovePCForm,
     updateCCFormField,
     updatePCFormField,
+    updateCCValues,
+    randomizeCCValues,
     handleReorder,
     handleGlobalMidiChannelChange,
     setPresetName,

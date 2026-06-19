@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useMemo, useRef, useState, type ChangeEvent } from "react";
+import { createPortal } from "react-dom";
+import useModalDismiss from "../hooks/useModalDismiss";
 import {
   ModalOverlay,
   ModalCard,
@@ -64,44 +66,7 @@ const PresetBrowser = ({
       .catch(() => setStatus("failed"));
   };
 
-  useEffect(() => {
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    closeRef.current?.focus();
-    return () => previouslyFocused?.focus?.();
-  }, []);
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-        return;
-      }
-      if (event.key !== "Tab" || !cardRef.current) return;
-
-      const focusable = Array.from(
-        cardRef.current.querySelectorAll<HTMLElement>(
-          'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter(
-        (el) => !el.hasAttribute("disabled") && el.offsetParent !== null,
-      );
-      if (focusable.length === 0) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-
-      if (event.shiftKey && active === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
+  useModalDismiss(cardRef, closeRef, onClose);
 
   const brands = useMemo(
     () => (catalog ? Object.keys(catalog) : []),
@@ -128,7 +93,7 @@ const PresetBrowser = ({
     onClose();
   };
 
-  return (
+  return createPortal(
     <ModalOverlay
       onClick={onClose}
       role="dialog"
@@ -178,7 +143,12 @@ const PresetBrowser = ({
           ) : status === "loading" ? (
             <ModalHint>loading device list…</ModalHint>
           ) : status === "failed" ? (
-            <ModalHint>*openMIDI presets are currently unavailable*</ModalHint>
+            <>
+              <ModalHint>*openMIDI presets are currently unavailable*</ModalHint>
+              <NavButton type="button" onClick={handlePullData}>
+                try again
+              </NavButton>
+            </>
           ) : (
             <>
               <ModalField>
@@ -235,7 +205,8 @@ const PresetBrowser = ({
           )}
         </ModalSection>
       </ModalCard>
-    </ModalOverlay>
+    </ModalOverlay>,
+    document.body,
   );
 };
 

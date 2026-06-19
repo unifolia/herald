@@ -15,6 +15,7 @@ import Device from "./lib/Device";
 import useMIDI from "./hooks/useMIDI";
 import useDragReorder from "./hooks/useDragReorder";
 import usePresetBlocks from "./hooks/usePresetBlocks";
+import useModulation from "./hooks/useModulation";
 import {
   getPresetLoadErrorMessage,
   readPresetFile,
@@ -52,6 +53,8 @@ const App = () => {
     handleRemovePCForm,
     updateCCFormField,
     updatePCFormField,
+    updateCCValues,
+    randomizeCCValues,
     handleReorder,
     handleGlobalMidiChannelChange,
     setPresetName,
@@ -60,6 +63,18 @@ const App = () => {
 
   const { deviceList, device, setDevice, isMidiOutput, sendCC, sendPC } =
     useMIDI({ onCC: handleIncomingCC });
+
+  const {
+    activeModulation,
+    handleRandomizeCCValues,
+    handleToggleWave,
+    handleToggleDrift,
+  } = useModulation({
+    ccForms: forms.inputs,
+    sendCC,
+    updateCCValues,
+    randomizeCCValues,
+  });
 
   const toggleLayout = useCallback(
     () => setLayout((l) => (l === "tile" ? "row" : "tile")),
@@ -78,6 +93,7 @@ const App = () => {
     orderedIds,
     draggedId,
     handlePointerDown,
+    moveItem,
     registerRef,
     containerRef,
   } = useDragReorder(allItems, handleReorder);
@@ -132,6 +148,11 @@ const App = () => {
             handleAddPCInput={handleAddPCInput}
             savePreset={savePreset}
             openLoadPreset={() => setIsLoadModalOpen(true)}
+            randomizeCCValues={handleRandomizeCCValues}
+            isWaveActive={activeModulation === "wave"}
+            onToggleWave={handleToggleWave}
+            isDriftActive={activeModulation === "drift"}
+            onToggleDrift={handleToggleDrift}
             globalMidiChannel={globalMidiChannel}
             handleGlobalMidiChannelChange={handleGlobalMidiChannelChange}
             layout={layout}
@@ -173,6 +194,7 @@ const App = () => {
                     sendCC={sendCC}
                     dragRef={registerRef(form.id)}
                     onDragPointerDown={handlePointerDown}
+                    onMove={moveItem}
                     isDragging={draggedId === form.id}
                     layout={layout}
                   />
@@ -192,6 +214,7 @@ const App = () => {
                   sendPC={sendPC}
                   dragRef={registerRef(pc.id)}
                   onDragPointerDown={handlePointerDown}
+                  onMove={moveItem}
                   isDragging={draggedId === pc.id}
                   layout={layout}
                 />
