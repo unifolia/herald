@@ -25,6 +25,7 @@ import {
   handleLabelKeyDown,
 } from "../util/labelHandler";
 import useColorPicker from "../hooks/useColorPicker";
+import { withAlpha } from "../util/color";
 import type { MidiPCFormData, Layout } from "../types";
 
 interface MidiPCFormProps {
@@ -97,7 +98,7 @@ const MidiPCForm = memo(
         ref={dragRef}
         data-layout={layout}
         style={{
-          background: backgroundColor + "55",
+          background: withAlpha(backgroundColor),
           ...(isDragging && { opacity: 0 }),
         }}
         role="group"

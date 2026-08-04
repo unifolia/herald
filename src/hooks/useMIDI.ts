@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { toSafeMidiChannel, toSafeMidiValue } from "../util/midi";
 
 interface UseMIDIOptions {
   onCC?: (channel: number, cc: number, value: number) => void;
@@ -59,13 +60,6 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
   const attachInputListeners = useCallback((midiAccess: MIDIAccess) => {
     for (const input of midiAccess.inputs.values()) {
       input.onmidimessage = (event: MIDIMessageEvent) => {
-        if (
-          event.target &&
-          (event.target as MIDIInput).name !== deviceRef.current
-        ) {
-          return;
-        }
-
         if (!event.data || event.data.length < 3) return;
 
         const [status, data1, data2] = event.data;
@@ -124,14 +118,23 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
 
   const sendCC = useCallback(
     (channel: number, cc: number, value: number) => {
-      getOutput()?.send([0xb0 + channel - 1, cc, value]);
+      const safeChannel = toSafeMidiChannel(channel);
+      const safeCC = toSafeMidiValue(cc);
+      const safeValue = toSafeMidiValue(value);
+      if (safeChannel === null || safeCC === null || safeValue === null) return;
+
+      getOutput()?.send([0xb0 + safeChannel - 1, safeCC, safeValue]);
     },
     [getOutput],
   );
 
   const sendPC = useCallback(
     (channel: number, program: number) => {
-      getOutput()?.send([0xc0 + channel - 1, program]);
+      const safeChannel = toSafeMidiChannel(channel);
+      const safeProgram = toSafeMidiValue(program);
+      if (safeChannel === null || safeProgram === null) return;
+
+      getOutput()?.send([0xc0 + safeChannel - 1, safeProgram]);
     },
     [getOutput],
   );

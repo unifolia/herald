@@ -65,14 +65,23 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
 
   const handleIncomingCC = useCallback(
     (channel: number, cc: number, value: number) => {
-      setForms((prev) => ({
-        ...prev,
-        inputs: prev.inputs.map((form) =>
-          form.midiChannel === channel && form.midiCC === cc
-            ? { ...form, value }
-            : form,
-        ),
-      }));
+      setForms((prev) => {
+        let changed = false;
+        const inputs = prev.inputs.map((form) => {
+          if (
+            form.midiChannel !== channel ||
+            form.midiCC !== cc ||
+            form.value === value
+          ) {
+            return form;
+          }
+
+          changed = true;
+          return { ...form, value };
+        });
+
+        return changed ? { ...prev, inputs } : prev;
+      });
     },
     [],
   );
@@ -237,11 +246,15 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
 
   const setPresetState = useCallback((preset: ParsedPreset) => {
     setForms({ name: preset.name, inputs: preset.inputs });
-    nextIdRef.current = Math.max(...preset.inputs.map((form) => form.id), 0) + 1;
     setPcForms(preset.pcForms);
-    nextPcIdRef.current =
-      Math.min(...preset.pcForms.map((form) => form.id), 0) - 1;
     setFormOrder(preset.formOrder);
+
+    const allIds = [
+      ...preset.inputs.map((form) => form.id),
+      ...preset.pcForms.map((form) => form.id),
+    ];
+    nextIdRef.current = Math.max(...allIds, 0) + 1;
+    nextPcIdRef.current = Math.min(...allIds, 0) - 1;
   }, []);
 
   return {

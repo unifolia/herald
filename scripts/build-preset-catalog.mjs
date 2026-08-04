@@ -49,7 +49,7 @@ for (const brand of mapping.brands ?? []) {
   }
 }
 
-const catalog = {};
+const catalog = Object.create(null);
 let deviceCount = 0;
 let ccCount = 0;
 let skipped = 0;
@@ -87,7 +87,7 @@ for (const [manufacturer, devices] of Object.entries(raw)) {
       info.model ||
       deviceSlug;
 
-    if (!catalog[brand]) catalog[brand] = {};
+    if (!catalog[brand]) catalog[brand] = Object.create(null);
     catalog[brand][deviceName] = ccs;
     deviceCount += 1;
     ccCount += ccs.length;

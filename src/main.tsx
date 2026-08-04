@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
+import ErrorBoundary from "./lib/ErrorBoundary.tsx";
 
 console.log(
   "%cmidi",
@@ -19,6 +20,8 @@ console.log("Questions? Concerns? Chit-chat? Email me at james@jameslewis.io");
 
 createRoot(document.getElementById("app")!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );
