@@ -1,4 +1,5 @@
 import type { MidiCCFormData } from "../types";
+import { clampMidiValue } from "./midi";
 
 export type ModulationMode = "wave" | "drift" | null;
 
@@ -26,8 +27,6 @@ export interface DriftConfig {
   moveDelayMs: number;
   nextMoveAt: number;
 }
-
-const clampMidiValue = (value: number) => Math.max(0, Math.min(127, value));
 
 const randomBetween = (min: number, max: number) =>
   min + Math.random() * (max - min);
@@ -154,10 +153,10 @@ const getDriftValue = (
   }
 
   let value = clampMidiValue(currentValue + direction);
-  if (value >= config.high) {
+  if (value >= config.high && currentValue <= config.high) {
     value = config.high;
     direction = -1;
-  } else if (value <= config.low) {
+  } else if (value <= config.low && currentValue >= config.low) {
     value = config.low;
     direction = 1;
   }

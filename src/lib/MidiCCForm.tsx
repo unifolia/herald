@@ -7,6 +7,7 @@ import {
   handleLabelKeyDown,
 } from "../util/labelHandler";
 import useColorPicker from "../hooks/useColorPicker";
+import { withAlpha } from "../util/color";
 import type { MidiCCFormData, Layout } from "../types";
 import {
   MidiFormContainer,
@@ -106,7 +107,7 @@ const MidiCCForm = memo(
         ref={dragRef}
         data-layout={layout}
         style={{
-          background: backgroundColor + "55",
+          background: withAlpha(backgroundColor),
           ...(isDragging && { opacity: 0 }),
         }}
         role="group"

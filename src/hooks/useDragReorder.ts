@@ -139,29 +139,24 @@ const useDragReorder = (
     const currentOrder = orderedIdsRef.current;
 
     const slots: { id: number; rect: LayoutRect }[] = [];
+    const layoutRects: LayoutRect[] = [];
     for (const id of currentOrder) {
-      if (id === dragId) continue;
       const el = itemElsRef.current.get(id);
       if (!el) continue;
-      slots.push({ id, rect: getAnimationlessRect(el) });
+
+      const rect = getAnimationlessRect(el);
+      layoutRects.push(rect);
+      if (id !== dragId) slots.push({ id, rect });
     }
 
     const rectsShareRow = (a: LayoutRect, b: LayoutRect) =>
       a.top < b.bottom - 1 && b.top < a.bottom - 1;
 
     let singleColumn = true;
-    for (let i = 1; i < slots.length; i++) {
-      if (rectsShareRow(slots[i].rect, slots[i - 1].rect)) {
+    for (let i = 1; i < layoutRects.length; i++) {
+      if (rectsShareRow(layoutRects[i], layoutRects[i - 1])) {
         singleColumn = false;
         break;
-      }
-    }
-
-    if (singleColumn && slots.length === 1) {
-      const dragEl = itemElsRef.current.get(dragId);
-      const placeholderRect = dragEl ? getAnimationlessRect(dragEl) : null;
-      if (placeholderRect && rectsShareRow(placeholderRect, slots[0].rect)) {
-        singleColumn = false;
       }
     }
 
