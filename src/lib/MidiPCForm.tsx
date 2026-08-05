@@ -10,7 +10,6 @@ import {
   RemoveButton,
   FormGroup,
   FormLabel,
-  Select,
   SendButton,
   ColorPicker,
   ColorSwatch,
@@ -27,6 +26,8 @@ import {
 import useColorPicker from "../hooks/useColorPicker";
 import { withAlpha } from "../util/color";
 import type { MidiPCFormData, Layout } from "../types";
+import MidiSelect from "./MidiSelect";
+import { CHANNEL_OPTIONS, MIDI_VALUE_OPTIONS } from "./midiOptions";
 
 interface MidiPCFormProps {
   id: number;
@@ -75,6 +76,16 @@ const MidiPCForm = memo(
         onDragPointerDown?.(e, id);
       },
       [onDragPointerDown, id],
+    );
+
+    const handleChannelChange = useCallback(
+      (next: number) => updatePCFormField(id, "midiChannel", next),
+      [updatePCFormField, id],
+    );
+
+    const handleProgramChange = useCallback(
+      (next: number) => updatePCFormField(id, "program", next),
+      [updatePCFormField, id],
     );
 
     const handleDragKeyDown = useCallback(
@@ -157,36 +168,22 @@ const MidiPCForm = memo(
         <SelectRow>
           <FormGroup>
             <FormLabel htmlFor={`pc-midi-channel-${id}`}>Channel:</FormLabel>
-            <Select
+            <MidiSelect
               id={`pc-midi-channel-${id}`}
               value={midiChannel}
-              onChange={(e) =>
-                updatePCFormField(id, "midiChannel", Number(e.target.value))
-              }
-            >
-              {Array.from({ length: 16 }, (_, i) => i + 1).map((channel) => (
-                <option key={channel} value={channel}>
-                  {channel}
-                </option>
-              ))}
-            </Select>
+              options={CHANNEL_OPTIONS}
+              onChange={handleChannelChange}
+            />
           </FormGroup>
 
           <FormGroup>
             <FormLabel htmlFor={`pc-program-${id}`}>MIDI PC:</FormLabel>
-            <Select
+            <MidiSelect
               id={`pc-program-${id}`}
               value={program}
-              onChange={(e) =>
-                updatePCFormField(id, "program", Number(e.target.value))
-              }
-            >
-              {Array.from({ length: 128 }, (_, i) => i).map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </Select>
+              options={MIDI_VALUE_OPTIONS}
+              onChange={handleProgramChange}
+            />
           </FormGroup>
         </SelectRow>
 

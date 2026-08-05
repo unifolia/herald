@@ -15,6 +15,20 @@ type LayoutRect = Pick<
 
 const edgeSwapProgress = 2 / 3;
 
+interface DragSlot {
+  rect: LayoutRect;
+  orderIndex: number;
+}
+
+interface DragLayout {
+  slots: DragSlot[];
+  singleColumn: boolean;
+  dragOrderIndex: number;
+}
+
+const rectsShareRow = (a: LayoutRect, b: LayoutRect) =>
+  a.top < b.bottom - 1 && b.top < a.bottom - 1;
+
 const getAnimationlessRect = (el: HTMLElement): LayoutRect => {
   const rect = el.getBoundingClientRect();
   const transform = window.getComputedStyle(el).transform;
@@ -55,6 +69,7 @@ const useDragReorder = (
     new Map<number, (el: HTMLElement | null) => void>(),
   );
   const prevRectsRef = useRef(new Map<number, DOMRect>());
+  const dragLayoutRef = useRef<DragLayout | null>(null);
   const needsFlipRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragActiveRef = useRef(false);
@@ -86,7 +101,13 @@ const useDragReorder = (
     orderedIdsRef.current = orderedIds;
   }, [orderedIds]);
 
+  const invalidateDragLayout = useCallback(() => {
+    dragLayoutRef.current = null;
+  }, []);
+
   useLayoutEffect(() => {
+    invalidateDragLayout();
+
     if (!needsFlipRef.current) return;
     needsFlipRef.current = false;
 
@@ -117,7 +138,7 @@ const useDragReorder = (
         },
       );
     });
-  }, [orderedIds, draggedId]);
+  }, [orderedIds, draggedId, invalidateDragLayout]);
 
   const snapshotRects = () => {
     itemElsRef.current.forEach((el) => {
@@ -129,6 +150,36 @@ const useDragReorder = (
     });
     prevRectsRef.current = rects;
     needsFlipRef.current = true;
+    dragLayoutRef.current = null;
+  };
+
+  const buildDragLayout = (dragId: number): DragLayout => {
+    const currentOrder = orderedIdsRef.current;
+    const slots: DragSlot[] = [];
+    const orderedRects: LayoutRect[] = [];
+
+    currentOrder.forEach((id, orderIndex) => {
+      const el = itemElsRef.current.get(id);
+      if (!el) return;
+
+      const rect = getAnimationlessRect(el);
+      orderedRects.push(rect);
+      if (id !== dragId) slots.push({ rect, orderIndex });
+    });
+
+    let singleColumn = true;
+    for (let i = 1; i < orderedRects.length; i++) {
+      if (rectsShareRow(orderedRects[i], orderedRects[i - 1])) {
+        singleColumn = false;
+        break;
+      }
+    }
+
+    return {
+      slots,
+      singleColumn,
+      dragOrderIndex: currentOrder.indexOf(dragId),
+    };
   };
 
   const computeTargetIndex = (
@@ -136,39 +187,19 @@ const useDragReorder = (
     dragId: number,
     dragRect: LayoutRect,
   ): number => {
-    const currentOrder = orderedIdsRef.current;
-
-    const slots: { id: number; rect: LayoutRect }[] = [];
-    const layoutRects: LayoutRect[] = [];
-    for (const id of currentOrder) {
-      const el = itemElsRef.current.get(id);
-      if (!el) continue;
-
-      const rect = getAnimationlessRect(el);
-      layoutRects.push(rect);
-      if (id !== dragId) slots.push({ id, rect });
+    let layout = dragLayoutRef.current;
+    if (!layout) {
+      layout = buildDragLayout(dragId);
+      dragLayoutRef.current = layout;
     }
 
-    const rectsShareRow = (a: LayoutRect, b: LayoutRect) =>
-      a.top < b.bottom - 1 && b.top < a.bottom - 1;
-
-    let singleColumn = true;
-    for (let i = 1; i < layoutRects.length; i++) {
-      if (rectsShareRow(layoutRects[i], layoutRects[i - 1])) {
-        singleColumn = false;
-        break;
-      }
-    }
-
-    const dragOrderIndex = currentOrder.indexOf(dragId);
+    const { slots, singleColumn, dragOrderIndex } = layout;
 
     for (let i = 0; i < slots.length; i++) {
-      const { rect } = slots[i];
+      const { rect, orderIndex } = slots[i];
 
       if (singleColumn) {
-        const slotOrderIndex = currentOrder.indexOf(slots[i].id);
-
-        if (slotOrderIndex < dragOrderIndex) {
+        if (orderIndex < dragOrderIndex) {
           const threshold = rect.bottom - rect.height * edgeSwapProgress;
           if (dragRect.top < threshold) return i;
         } else {
@@ -178,9 +209,7 @@ const useDragReorder = (
       } else {
         if (pointerY < rect.top) return i;
         if (pointerY < rect.bottom) {
-          const slotOrderIndex = currentOrder.indexOf(slots[i].id);
-
-          if (slotOrderIndex < dragOrderIndex) {
+          if (orderIndex < dragOrderIndex) {
             const threshold = rect.right - rect.width * edgeSwapProgress;
             if (dragRect.left < threshold) return i;
           } else {
@@ -237,6 +266,8 @@ const useDragReorder = (
     const previousBodyUserSelect = document.body.style.userSelect;
 
     let clone: HTMLElement | null = null;
+    let cloneBaseLeft = 0;
+    let cloneBaseTop = 0;
     let activated = false;
     let finished = false;
     let settleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -245,9 +276,12 @@ const useDragReorder = (
     const activate = () => {
       activated = true;
       dragActiveRef.current = true;
+      invalidateDragLayout();
 
       clone = el.cloneNode(true) as HTMLElement;
       const currentRect = el.getBoundingClientRect();
+      cloneBaseLeft = currentRect.left;
+      cloneBaseTop = currentRect.top;
 
       clone.style.position = "fixed";
       clone.style.left = `${currentRect.left}px`;
@@ -260,8 +294,11 @@ const useDragReorder = (
       clone.style.opacity = "0.85";
       clone.style.boxShadow = "0 20px 60px rgba(7,5,3,0.58)";
       clone.style.cursor = "grabbing";
-      clone.style.willChange = "left, top";
+      clone.style.willChange = "transform";
       clone.style.transition = "box-shadow 200ms, opacity 200ms";
+
+      window.addEventListener("scroll", invalidateDragLayout, true);
+      window.addEventListener("resize", invalidateDragLayout);
 
       document.body.appendChild(clone);
       document.body.style.cursor = "grabbing";
@@ -295,8 +332,9 @@ const useDragReorder = (
       };
 
       if (clone) {
-        clone.style.left = `${dragLeft}px`;
-        clone.style.top = `${dragTop}px`;
+        clone.style.transform = `translate3d(${dragLeft - cloneBaseLeft}px, ${
+          dragTop - cloneBaseTop
+        }px, 0)`;
       }
 
       const targetIdx = computeTargetIndex(me.clientY, id, dragRect);
@@ -318,6 +356,8 @@ const useDragReorder = (
       document.removeEventListener("pointercancel", onCancel);
       document.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("blur", onWindowBlur);
+      window.removeEventListener("scroll", invalidateDragLayout, true);
+      window.removeEventListener("resize", invalidateDragLayout);
       document.body.style.cursor = previousBodyCursor;
       document.body.style.userSelect = previousBodyUserSelect;
 
@@ -371,9 +411,10 @@ const useDragReorder = (
 
       const finalRect = el.getBoundingClientRect();
       clone.style.transition =
-        "left 200ms cubic-bezier(0.25, 1, 0.5, 1), top 200ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 200ms, opacity 200ms";
-      clone.style.left = `${finalRect.left}px`;
-      clone.style.top = `${finalRect.top}px`;
+        "transform 200ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 200ms, opacity 200ms";
+      clone.style.transform = `translate3d(${finalRect.left - cloneBaseLeft}px, ${
+        finalRect.top - cloneBaseTop
+      }px, 0)`;
       clone.style.boxShadow = "";
       clone.style.opacity = "1";
 
@@ -417,6 +458,7 @@ const useDragReorder = (
     document.addEventListener("pointercancel", onCancel);
     document.addEventListener("keydown", onKeyDown);
     window.addEventListener("blur", onWindowBlur);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const moveItem = useCallback((id: number, direction: -1 | 1) => {

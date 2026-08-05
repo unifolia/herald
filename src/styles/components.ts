@@ -237,7 +237,6 @@ export const FormsContainer = styled.div<{ $layout?: Layout }>`
 export const MidiFormContainer = styled.div`
   box-sizing: border-box;
   background: var(--surface-glass);
-  backdrop-filter: blur(20px);
   border: 1px solid var(--surface-glass-border);
   border-radius: ${theme.borderRadius.xl};
   padding: ${theme.spacing.md};
@@ -466,7 +465,6 @@ export const FormTitleInput = styled.input`
   outline: none;
   text-transform: lowercase;
   letter-spacing: 0.02em;
-  backdrop-filter: blur(10px);
   text-align: center;
 
   &.header {
@@ -499,7 +497,6 @@ export const RemoveButton = styled.button`
   border-radius: ${theme.borderRadius.md};
   cursor: pointer;
   transition: ${theme.transitions.default};
-  backdrop-filter: blur(10px);
 
   &::before,
   &::after {
@@ -749,7 +746,6 @@ export const Select = styled.select`
   color: var(--text-primary);
   font-family: inherit;
   font-size: ${theme.fonts.sizes.label};
-  backdrop-filter: blur(10px);
   cursor: pointer;
 
   &:hover {
