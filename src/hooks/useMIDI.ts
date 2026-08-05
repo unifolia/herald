@@ -22,9 +22,11 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
   const midiAccessRef = useRef<MIDIAccess | null>(null);
   const deviceRef = useRef(device);
   const onCCRef = useRef(onCC);
+  const outputRef = useRef<MIDIOutput | null>(null);
 
   useEffect(() => {
     deviceRef.current = device;
+    outputRef.current = null;
   }, [device]);
 
   useEffect(() => {
@@ -90,6 +92,7 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
         attachInputListeners(midiAccess);
 
         midiAccess.onstatechange = () => {
+          outputRef.current = null;
           updateDeviceList(midiAccess);
           attachInputListeners(midiAccess);
         };
@@ -109,11 +112,27 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
   }, [updateDeviceList, attachInputListeners]);
 
   const getOutput = useCallback((): MIDIOutput | undefined => {
+    const cached = outputRef.current;
+    if (
+      cached &&
+      cached.name === deviceRef.current &&
+      cached.state === "connected"
+    ) {
+      return cached;
+    }
+
     const midiAccess = midiAccessRef.current;
     if (!midiAccess) return undefined;
-    return Array.from(midiAccess.outputs.values()).find(
-      (o) => o.name === deviceRef.current,
-    );
+
+    for (const output of midiAccess.outputs.values()) {
+      if (output.name === deviceRef.current) {
+        outputRef.current = output;
+        return output;
+      }
+    }
+
+    outputRef.current = null;
+    return undefined;
   }, []);
 
   const sendCC = useCallback(

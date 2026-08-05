@@ -9,6 +9,8 @@ import {
 import useColorPicker from "../hooks/useColorPicker";
 import { withAlpha } from "../util/color";
 import type { MidiCCFormData, Layout } from "../types";
+import MidiSelect from "./MidiSelect";
+import { CHANNEL_OPTIONS, MIDI_VALUE_OPTIONS } from "./midiOptions";
 import {
   MidiFormContainer,
   FormHeader,
@@ -19,7 +21,6 @@ import {
   RemoveButton,
   FormGroup,
   FormLabel,
-  Select,
   RangeInput,
   ColorPicker,
   ColorSwatch,
@@ -86,6 +87,16 @@ const MidiCCForm = memo(
         onDragPointerDown?.(e, id);
       },
       [onDragPointerDown, id],
+    );
+
+    const handleChannelChange = useCallback(
+      (next: number) => updateCCFormField(id, "midiChannel", next),
+      [updateCCFormField, id],
+    );
+
+    const handleCCChange = useCallback(
+      (next: number) => updateCCFormField(id, "midiCC", next),
+      [updateCCFormField, id],
     );
 
     const handleDragKeyDown = useCallback(
@@ -166,36 +177,22 @@ const MidiCCForm = memo(
         <SelectRow>
           <FormGroup>
             <FormLabel htmlFor={`midi-channel-${id}`}>Channel:</FormLabel>
-            <Select
+            <MidiSelect
               id={`midi-channel-${id}`}
               value={midiChannel}
-              onChange={(e) =>
-                updateCCFormField(id, "midiChannel", Number(e.target.value))
-              }
-            >
-              {Array.from({ length: 16 }, (_, i) => i + 1).map((channel) => (
-                <option key={channel} value={channel}>
-                  {channel}
-                </option>
-              ))}
-            </Select>
+              options={CHANNEL_OPTIONS}
+              onChange={handleChannelChange}
+            />
           </FormGroup>
 
           <FormGroup>
             <FormLabel htmlFor={`midi-cc-${id}`}>MIDI CC:</FormLabel>
-            <Select
+            <MidiSelect
               id={`midi-cc-${id}`}
               value={midiCC}
-              onChange={(e) =>
-                updateCCFormField(id, "midiCC", Number(e.target.value))
-              }
-            >
-              {Array.from({ length: 128 }, (_, i) => i).map((cc) => (
-                <option key={cc} value={cc}>
-                  {cc}
-                </option>
-              ))}
-            </Select>
+              options={MIDI_VALUE_OPTIONS}
+              onChange={handleCCChange}
+            />
           </FormGroup>
         </SelectRow>
 

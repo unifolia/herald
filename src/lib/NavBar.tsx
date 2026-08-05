@@ -9,6 +9,7 @@ import {
 } from "../styles/components";
 import ConfirmModal from "./ConfirmModal";
 import AdvancedModal from "./AdvancedModal";
+import { CHANNEL_OPTIONS } from "./midiOptions";
 import type { Layout } from "../types";
 
 interface NavigationProps {
@@ -74,11 +75,7 @@ const Navigation = ({
           }}
         >
           <option value="">—</option>
-          {Array.from({ length: 16 }, (_, i) => i + 1).map((channel) => (
-            <option key={channel} value={channel}>
-              {channel}
-            </option>
-          ))}
+          {CHANNEL_OPTIONS}
         </GlobalChannelSelect>
       </GlobalChannelContainer>
       {pendingChannel !== null && (

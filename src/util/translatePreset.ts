@@ -20,7 +20,7 @@ export interface TranslateResult {
 }
 
 const CATALOG_URL = `${import.meta.env.BASE_URL}presetCatalog.json`;
-const CATALOG_TIMEOUT_MS = 3000;
+const CATALOG_TIMEOUT_MS = 15000;
 
 let catalogPromise: Promise<PresetCatalog> | null = null;
 let cachedCatalog: PresetCatalog | null = null;
