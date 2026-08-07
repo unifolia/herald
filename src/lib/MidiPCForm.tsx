@@ -1,33 +1,8 @@
 import { useState, useCallback, useEffect, useRef, memo } from "react";
-import { HexColorPicker } from "react-colorful";
-import {
-  MidiFormContainer,
-  FormHeader,
-  FormHeaderContent,
-  DragHandleButton,
-  FormTitleDisplay,
-  FormTitleInput,
-  RemoveButton,
-  FormGroup,
-  FormLabel,
-  SendButton,
-  ColorPicker,
-  ColorSwatch,
-  ColorPopover,
-  HexInput,
-  SelectRow,
-} from "../styles/components";
-import {
-  handleLabelClick,
-  handleLabelChange,
-  handleLabelBlur,
-  handleLabelKeyDown,
-} from "../util/labelHandler";
-import useColorPicker from "../hooks/useColorPicker";
-import { withAlpha } from "../util/color";
 import type { MidiPCFormData, Layout } from "../types";
-import MidiSelect from "./MidiSelect";
-import { CHANNEL_OPTIONS, MIDI_VALUE_OPTIONS } from "./midiOptions";
+import BlockShell from "./BlockShell";
+import { SendButton } from "../styles/components";
+import { SEND_FLASH_MS } from "../constants";
 
 interface MidiPCFormProps {
   id: number;
@@ -65,178 +40,49 @@ const MidiPCForm = memo(
     isDragging,
     layout,
   }: MidiPCFormProps) => {
-    const [isEditing, setIsEditing] = useState(false);
     const [sent, setSent] = useState(false);
     const sentTimer = useRef<ReturnType<typeof setTimeout>>();
-    const { isPickerOpen, pickerRef, swatchRef, togglePicker } =
-      useColorPicker();
-
-    const handlePointerDown = useCallback(
-      (e: React.PointerEvent) => {
-        onDragPointerDown?.(e, id);
-      },
-      [onDragPointerDown, id],
-    );
-
-    const handleChannelChange = useCallback(
-      (next: number) => updatePCFormField(id, "midiChannel", next),
-      [updatePCFormField, id],
-    );
 
     const handleProgramChange = useCallback(
       (next: number) => updatePCFormField(id, "program", next),
       [updatePCFormField, id],
     );
 
-    const handleDragKeyDown = useCallback(
-      (e: React.KeyboardEvent) => {
-        if (!e.altKey) return;
-        if (e.key === "ArrowUp") {
-          e.preventDefault();
-          onMove?.(id, -1);
-        } else if (e.key === "ArrowDown") {
-          e.preventDefault();
-          onMove?.(id, 1);
-        }
-      },
-      [onMove, id],
-    );
+    const handleSend = useCallback(() => {
+      sendPC(midiChannel, program);
+      clearTimeout(sentTimer.current);
+      setSent(true);
+      sentTimer.current = setTimeout(() => setSent(false), SEND_FLASH_MS);
+    }, [sendPC, midiChannel, program]);
 
     useEffect(() => () => clearTimeout(sentTimer.current), []);
 
     return (
-      <MidiFormContainer
-        ref={dragRef}
-        data-layout={layout}
-        style={{
-          background: withAlpha(backgroundColor),
-          ...(isDragging && { opacity: 0 }),
-        }}
-        role="group"
-        aria-label={label}
+      <BlockShell
+        id={id}
+        fieldIdPrefix="pc"
+        label={label}
+        backgroundColor={backgroundColor}
+        midiChannel={midiChannel}
+        layout={layout}
+        secondaryLabel="MIDI PC:"
+        secondaryValue={program}
+        onSecondaryChange={handleProgramChange}
+        onRemove={onRemove}
+        updateField={updatePCFormField}
+        dragRef={dragRef}
+        onDragPointerDown={onDragPointerDown}
+        onMove={onMove}
+        isDragging={isDragging}
       >
-        <FormHeader>
-          <FormHeaderContent>
-            <DragHandleButton
-              type="button"
-              $dotColor={backgroundColor}
-              aria-label={`Reorder ${label}. Drag, or use Alt with the arrow keys.`}
-              title="Drag to reorder (or Alt+↑/↓)"
-              onPointerDown={handlePointerDown}
-              onKeyDown={handleDragKeyDown}
-            />
-            {isEditing ? (
-              <FormTitleInput
-                type="text"
-                value={label}
-                aria-label="Control block name"
-                onChange={(e) =>
-                  handleLabelChange((v) => updatePCFormField(id, "label", v), e)
-                }
-                onBlur={() =>
-                  handleLabelBlur(setIsEditing, label, (v) =>
-                    updatePCFormField(id, "label", v),
-                  )
-                }
-                onKeyDown={(e) => handleLabelKeyDown(setIsEditing, e)}
-                autoFocus
-              />
-            ) : (
-              <FormTitleDisplay
-                role="button"
-                tabIndex={0}
-                onClick={() => handleLabelClick(setIsEditing)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleLabelClick(setIsEditing);
-                  }
-                }}
-                aria-label={`${label} — click to rename`}
-              >
-                {label}
-              </FormTitleDisplay>
-            )}
-          </FormHeaderContent>
-          <RemoveButton
-            data-placement="header"
-            onClick={() => onRemove(id)}
-            aria-label={`Remove ${label}`}
-          />
-        </FormHeader>
-
-        <SelectRow>
-          <FormGroup>
-            <FormLabel htmlFor={`pc-midi-channel-${id}`}>Channel:</FormLabel>
-            <MidiSelect
-              id={`pc-midi-channel-${id}`}
-              value={midiChannel}
-              options={CHANNEL_OPTIONS}
-              onChange={handleChannelChange}
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <FormLabel htmlFor={`pc-program-${id}`}>MIDI PC:</FormLabel>
-            <MidiSelect
-              id={`pc-program-${id}`}
-              value={program}
-              options={MIDI_VALUE_OPTIONS}
-              onChange={handleProgramChange}
-            />
-          </FormGroup>
-        </SelectRow>
-
         <SendButton
           type="button"
           className={sent ? "sent" : ""}
-          onClick={() => {
-            sendPC(midiChannel, program);
-            clearTimeout(sentTimer.current);
-            setSent(true);
-            sentTimer.current = setTimeout(() => setSent(false), 400);
-          }}
+          onClick={handleSend}
         >
           Send
         </SendButton>
-
-        <ColorPicker ref={pickerRef}>
-          <FormLabel>Background:</FormLabel>
-          <ColorSwatch
-            ref={swatchRef}
-            type="button"
-            style={{ background: backgroundColor }}
-            onClick={togglePicker}
-            aria-label="Choose background color"
-            aria-haspopup="dialog"
-            aria-expanded={isPickerOpen}
-          />
-          {isPickerOpen && (
-            <ColorPopover>
-              <HexColorPicker
-                color={backgroundColor}
-                onChange={(color) =>
-                  updatePCFormField(id, "backgroundColor", color)
-                }
-              />
-              <HexInput
-                color={backgroundColor}
-                onChange={(color) =>
-                  updatePCFormField(id, "backgroundColor", color)
-                }
-                prefixed
-                aria-label="Background hex code"
-              />
-            </ColorPopover>
-          )}
-        </ColorPicker>
-
-        <RemoveButton
-          data-placement="end"
-          onClick={() => onRemove(id)}
-          aria-label={`Remove ${label}`}
-        />
-      </MidiFormContainer>
+      </BlockShell>
     );
   },
 );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   handleLabelClick,
   handleLabelChange,
@@ -18,6 +18,12 @@ interface HeaderProps {
 
 const Header = ({ name, setName }: HeaderProps) => {
   const [isEditing, setIsEditing] = useState(true);
+  const wasUserInitiated = useRef(false);
+
+  const startEditing = () => {
+    wasUserInitiated.current = true;
+    handleLabelClick(setIsEditing);
+  };
 
   return (
     <FormClickable>
@@ -31,7 +37,7 @@ const Header = ({ name, setName }: HeaderProps) => {
           onBlur={() => handleLabelBlur(setIsEditing, name, setName)}
           onKeyDown={(e) => handleLabelKeyDown(setIsEditing, e)}
           className="header"
-          autoFocus
+          autoFocus={wasUserInitiated.current}
         />
       ) : (
         <FormTitleDisplay
@@ -39,11 +45,11 @@ const Header = ({ name, setName }: HeaderProps) => {
           className="header"
           role="button"
           tabIndex={0}
-          onClick={() => handleLabelClick(setIsEditing)}
+          onClick={startEditing}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              handleLabelClick(setIsEditing);
+              startEditing();
             }
           }}
           aria-label={`${name} — click to rename`}

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { MidiCCFormData, MidiPCFormData } from "../types";
 import type { ParsedPreset } from "../util/presetIo";
+import { applyCCValues, applyIncomingCC } from "../util/blocks";
 
 const INITIAL_CC_ID = 1;
 const INITIAL_PC_ID = -1;
@@ -65,23 +66,7 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
 
   const handleIncomingCC = useCallback(
     (channel: number, cc: number, value: number) => {
-      setForms((prev) => {
-        let changed = false;
-        const inputs = prev.inputs.map((form) => {
-          if (
-            form.midiChannel !== channel ||
-            form.midiCC !== cc ||
-            form.value === value
-          ) {
-            return form;
-          }
-
-          changed = true;
-          return { ...form, value };
-        });
-
-        return changed ? { ...prev, inputs } : prev;
-      });
+      setForms((prev) => applyIncomingCC(prev, channel, cc, value));
     },
     [],
   );
@@ -212,18 +197,7 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
   );
 
   const updateCCValues = useCallback((valuesById: Map<number, number>) => {
-    setForms((prev) => {
-      let changed = false;
-      const inputs = prev.inputs.map((form) => {
-        const value = valuesById.get(form.id);
-        if (value === undefined || value === form.value) return form;
-
-        changed = true;
-        return { ...form, value };
-      });
-
-      return changed ? { ...prev, inputs } : prev;
-    });
+    setForms((prev) => applyCCValues(prev, valuesById));
   }, []);
 
   const randomizeCCValues = useCallback(() => {

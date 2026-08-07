@@ -311,7 +311,7 @@ export const FormHeaderContent = styled.div`
   `)}
 `;
 
-export const DragHandleButton = styled.button<{ $dotColor?: string }>`
+export const DragHandleButton = styled.button`
   --drag-handle-dot-color: var(--text-primary);
 
   width: ${dragHandleWidth};
@@ -786,6 +786,19 @@ export const RangeInput = styled.input`
   outline: none;
   cursor: pointer;
   position: relative;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 6px;
+  }
+
+  &:focus-visible::-webkit-slider-thumb {
+    box-shadow: var(--shadow-range-thumb-hover);
+  }
+
+  &:focus-visible::-moz-range-thumb {
+    box-shadow: var(--shadow-range-thumb-hover);
+  }
 
   &::-webkit-slider-thumb {
     -webkit-appearance: none;

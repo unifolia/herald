@@ -1,33 +1,8 @@
-import { useEffect, useState, useCallback, memo } from "react";
-import { HexColorPicker } from "react-colorful";
-import {
-  handleLabelClick,
-  handleLabelChange,
-  handleLabelBlur,
-  handleLabelKeyDown,
-} from "../util/labelHandler";
-import useColorPicker from "../hooks/useColorPicker";
-import { withAlpha } from "../util/color";
+import { useEffect, useCallback, memo } from "react";
 import type { MidiCCFormData, Layout } from "../types";
-import MidiSelect from "./MidiSelect";
-import { CHANNEL_OPTIONS, MIDI_VALUE_OPTIONS } from "./midiOptions";
-import {
-  MidiFormContainer,
-  FormHeader,
-  FormHeaderContent,
-  DragHandleButton,
-  FormTitleDisplay,
-  FormTitleInput,
-  RemoveButton,
-  FormGroup,
-  FormLabel,
-  RangeInput,
-  ColorPicker,
-  ColorSwatch,
-  ColorPopover,
-  HexInput,
-  SelectRow,
-} from "../styles/components";
+import BlockShell from "./BlockShell";
+import { FormGroup, FormLabel, RangeInput } from "../styles/components";
+import { MIDI_MAX_VALUE, MIDI_MIN_VALUE } from "../util/midi";
 
 interface MidiCCFormProps {
   id: number;
@@ -67,10 +42,6 @@ const MidiCCForm = memo(
     isDragging,
     layout,
   }: MidiCCFormProps) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const { isPickerOpen, pickerRef, swatchRef, togglePicker } =
-      useColorPicker();
-
     const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = Number(e.target.value);
       updateCCFormField(id, "value", newValue);
@@ -82,170 +53,42 @@ const MidiCCForm = memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sendCC, midiChannel, midiCC]);
 
-    const handlePointerDown = useCallback(
-      (e: React.PointerEvent) => {
-        onDragPointerDown?.(e, id);
-      },
-      [onDragPointerDown, id],
-    );
-
-    const handleChannelChange = useCallback(
-      (next: number) => updateCCFormField(id, "midiChannel", next),
-      [updateCCFormField, id],
-    );
-
     const handleCCChange = useCallback(
       (next: number) => updateCCFormField(id, "midiCC", next),
       [updateCCFormField, id],
     );
 
-    const handleDragKeyDown = useCallback(
-      (e: React.KeyboardEvent) => {
-        if (!e.altKey) return;
-        if (e.key === "ArrowUp") {
-          e.preventDefault();
-          onMove?.(id, -1);
-        } else if (e.key === "ArrowDown") {
-          e.preventDefault();
-          onMove?.(id, 1);
-        }
-      },
-      [onMove, id],
-    );
-
     return (
-      <MidiFormContainer
-        ref={dragRef}
-        data-layout={layout}
-        style={{
-          background: withAlpha(backgroundColor),
-          ...(isDragging && { opacity: 0 }),
-        }}
-        role="group"
-        aria-label={label}
+      <BlockShell
+        id={id}
+        fieldIdPrefix="cc"
+        label={label}
+        backgroundColor={backgroundColor}
+        midiChannel={midiChannel}
+        layout={layout}
+        secondaryLabel="MIDI CC:"
+        secondaryValue={midiCC}
+        onSecondaryChange={handleCCChange}
+        onRemove={onRemove}
+        updateField={updateCCFormField}
+        dragRef={dragRef}
+        onDragPointerDown={onDragPointerDown}
+        onMove={onMove}
+        isDragging={isDragging}
       >
-        <FormHeader>
-          <FormHeaderContent>
-            <DragHandleButton
-              type="button"
-              $dotColor={backgroundColor}
-              aria-label={`Reorder ${label}. Drag, or use Alt with the arrow keys.`}
-              title="Drag to reorder (or Alt+↑/↓)"
-              onPointerDown={handlePointerDown}
-              onKeyDown={handleDragKeyDown}
-            />
-            {isEditing ? (
-              <FormTitleInput
-                type="text"
-                value={label}
-                aria-label="Control block name"
-                onChange={(e) =>
-                  handleLabelChange((v) => updateCCFormField(id, "label", v), e)
-                }
-                onBlur={() =>
-                  handleLabelBlur(setIsEditing, label, (v) =>
-                    updateCCFormField(id, "label", v),
-                  )
-                }
-                onKeyDown={(e) => handleLabelKeyDown(setIsEditing, e)}
-                autoFocus
-              />
-            ) : (
-              <FormTitleDisplay
-                role="button"
-                tabIndex={0}
-                onClick={() => handleLabelClick(setIsEditing)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleLabelClick(setIsEditing);
-                  }
-                }}
-                aria-label={`${label} — click to rename`}
-              >
-                {label}
-              </FormTitleDisplay>
-            )}
-          </FormHeaderContent>
-          <RemoveButton
-            data-placement="header"
-            onClick={() => onRemove(id)}
-            aria-label={`Remove ${label}`}
-          />
-        </FormHeader>
-
-        <SelectRow>
-          <FormGroup>
-            <FormLabel htmlFor={`midi-channel-${id}`}>Channel:</FormLabel>
-            <MidiSelect
-              id={`midi-channel-${id}`}
-              value={midiChannel}
-              options={CHANNEL_OPTIONS}
-              onChange={handleChannelChange}
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <FormLabel htmlFor={`midi-cc-${id}`}>MIDI CC:</FormLabel>
-            <MidiSelect
-              id={`midi-cc-${id}`}
-              value={midiCC}
-              options={MIDI_VALUE_OPTIONS}
-              onChange={handleCCChange}
-            />
-          </FormGroup>
-        </SelectRow>
-
         <FormGroup>
           <FormLabel htmlFor={`value-slider-${id}`}>Value: {value}</FormLabel>
           <RangeInput
             id={`value-slider-${id}`}
             type="range"
-            min="0"
-            max="127"
+            min={MIDI_MIN_VALUE}
+            max={MIDI_MAX_VALUE}
             value={value}
             onChange={handleValueChange}
-            aria-valuetext={`${value} of 127`}
+            aria-valuetext={`${value} of ${MIDI_MAX_VALUE}`}
           />
         </FormGroup>
-
-        <ColorPicker ref={pickerRef}>
-          <FormLabel>Background:</FormLabel>
-          <ColorSwatch
-            ref={swatchRef}
-            type="button"
-            style={{ background: backgroundColor }}
-            onClick={togglePicker}
-            aria-label="Choose background color"
-            aria-haspopup="dialog"
-            aria-expanded={isPickerOpen}
-          />
-          {isPickerOpen && (
-            <ColorPopover>
-              <HexColorPicker
-                color={backgroundColor}
-                onChange={(color) =>
-                  updateCCFormField(id, "backgroundColor", color)
-                }
-              />
-              <HexInput
-                color={backgroundColor}
-                onChange={(color) =>
-                  updateCCFormField(id, "backgroundColor", color)
-                }
-                prefixed
-                aria-label="Background hex code"
-              />
-            </ColorPopover>
-          )}
-        </ColorPicker>
-
-        <RemoveButton
-          data-placement="end"
-          onClick={() => onRemove(id)}
-          aria-label={`Remove ${label}`}
-        />
-      </MidiFormContainer>
+      </BlockShell>
     );
   },
 );

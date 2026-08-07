@@ -27,8 +27,7 @@ import {
   saveColorSchemePreference,
 } from "./util/theme";
 import type { Layout, ColorScheme } from "./types";
-
-const MAX_BLOCKS = 127;
+import { MAX_BLOCKS } from "./constants";
 
 const App = () => {
   const [colorScheme, setColorScheme] = useState<ColorScheme>(
