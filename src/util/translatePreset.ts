@@ -1,5 +1,6 @@
 import type { MidiCCFormData } from "../types";
 import type { ParsedPreset } from "./presetIo";
+import { isMidiValue } from "./midi";
 
 export interface CatalogCC {
   name: string;
@@ -60,7 +61,13 @@ export const translateDevice = (
   ccs: CatalogCC[],
   { backgroundColor, maxBlocks }: TranslateOptions,
 ): TranslateResult => {
-  const usable = ccs.slice(0, maxBlocks);
+  const valid = ccs.filter(
+    (entry) =>
+      typeof entry?.name === "string" &&
+      entry.name !== "" &&
+      isMidiValue(entry.cc),
+  );
+  const usable = valid.slice(0, maxBlocks);
 
   const inputs: MidiCCFormData[] = usable.map((entry, index) => ({
     id: index + 1,
@@ -78,6 +85,6 @@ export const translateDevice = (
       pcForms: [],
       formOrder: inputs.map((input) => input.id),
     },
-    truncated: ccs.length - usable.length,
+    truncated: valid.length - usable.length,
   };
 };

@@ -22,7 +22,7 @@ interface NavigationProps {
   onToggleWave: () => void;
   isDriftActive: boolean;
   onToggleDrift: () => void;
-  globalMidiChannel: number | null;
+  sharedMidiChannel: number | null;
   handleGlobalMidiChannelChange: (channel: number) => void;
   layout: Layout;
   onToggleLayout: () => void;
@@ -38,7 +38,7 @@ const Navigation = ({
   onToggleWave,
   isDriftActive,
   onToggleDrift,
-  globalMidiChannel,
+  sharedMidiChannel,
   handleGlobalMidiChannelChange,
   layout,
   onToggleLayout,
@@ -68,7 +68,7 @@ const Navigation = ({
         </GlobalChannelLabel>
         <GlobalChannelSelect
           id="global-select"
-          value={globalMidiChannel ?? ""}
+          value={sharedMidiChannel ?? ""}
           onChange={(e) => {
             const val = e.target.value;
             if (val) setPendingChannel(Number(val));

@@ -33,16 +33,16 @@ const ConfirmModal = ({
   const cardRef = useRef<HTMLDivElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
 
-  useModalDismiss(cardRef, cancelRef, onCancel);
+  const overlayProps = useModalDismiss(cardRef, cancelRef, onCancel);
 
   return createPortal(
     <ModalOverlay
-      onClick={onCancel}
+      {...overlayProps}
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-modal-title"
     >
-      <ModalCard ref={cardRef} onClick={(event) => event.stopPropagation()}>
+      <ModalCard ref={cardRef}>
         <ModalHeader>
           <ModalTitle id="confirm-modal-title">{title}</ModalTitle>
           <ModalCloseButton

@@ -1,32 +1,43 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { toSafeMidiChannel, toSafeMidiValue } from "../util/midi";
+import {
+  labelMidiPorts,
+  toSafeMidiChannel,
+  toSafeMidiValue,
+  type MidiPortOption,
+} from "../util/midi";
+
+export type MidiStatus = "pending" | "unsupported" | "blocked" | "ready";
 
 interface UseMIDIOptions {
   onCC?: (channel: number, cc: number, value: number) => void;
 }
 
 interface UseMIDIReturn {
-  deviceList: string[];
+  status: MidiStatus;
+  deviceList: MidiPortOption[];
   device: string;
-  setDevice: (device: string) => void;
-  isMidiOutput: boolean;
+  setDevice: (deviceId: string) => void;
   sendCC: (channel: number, cc: number, value: number) => void;
   sendPC: (channel: number, program: number) => void;
 }
 
+const getInitialStatus = (): MidiStatus =>
+  typeof navigator !== "undefined" &&
+  typeof navigator.requestMIDIAccess === "function"
+    ? "pending"
+    : "unsupported";
+
 const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
-  const [deviceList, setDeviceList] = useState<string[]>([]);
+  const [status, setStatus] = useState<MidiStatus>(getInitialStatus);
+  const [deviceList, setDeviceList] = useState<MidiPortOption[]>([]);
   const [device, setDevice] = useState("");
-  const [isMidiOutput, setIsMidiOutput] = useState(false);
 
   const midiAccessRef = useRef<MIDIAccess | null>(null);
   const deviceRef = useRef(device);
   const onCCRef = useRef(onCC);
-  const outputRef = useRef<MIDIOutput | null>(null);
 
   useEffect(() => {
     deviceRef.current = device;
-    outputRef.current = null;
   }, [device]);
 
   useEffect(() => {
@@ -34,27 +45,13 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
   }, [onCC]);
 
   const updateDeviceList = useCallback((midiAccess: MIDIAccess) => {
-    const outputs = Array.from(midiAccess.outputs.values());
+    const outputs = Array.from(midiAccess.outputs.values()).filter(
+      (output) => output.state === "connected",
+    );
 
-    if (outputs.length === 0) {
-      setIsMidiOutput(false);
-      setDeviceList([]);
-      setDevice("");
-      return;
-    }
+    setDeviceList(labelMidiPorts(outputs));
 
-    setIsMidiOutput(true);
-
-    const names = [
-      ...new Set(
-        outputs
-          .map((output) => output.name)
-          .filter((name): name is string => name !== null && name !== ""),
-      ),
-    ];
-    setDeviceList(names);
-
-    if (!names.includes(deviceRef.current)) {
+    if (!outputs.some((output) => output.id === deviceRef.current)) {
       setDevice("");
     }
   }, []);
@@ -76,7 +73,7 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
   }, []);
 
   useEffect(() => {
-    if (!navigator.requestMIDIAccess) {
+    if (typeof navigator.requestMIDIAccess !== "function") {
       return;
     }
 
@@ -88,16 +85,18 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
         if (cancelled) return;
         acquired = midiAccess;
         midiAccessRef.current = midiAccess;
+        setStatus("ready");
         updateDeviceList(midiAccess);
         attachInputListeners(midiAccess);
 
         midiAccess.onstatechange = () => {
-          outputRef.current = null;
           updateDeviceList(midiAccess);
           attachInputListeners(midiAccess);
         };
       },
-      () => {},
+      () => {
+        if (!cancelled) setStatus("blocked");
+      },
     );
 
     return () => {
@@ -111,28 +110,18 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
     };
   }, [updateDeviceList, attachInputListeners]);
 
-  const getOutput = useCallback((): MIDIOutput | undefined => {
-    const cached = outputRef.current;
-    if (
-      cached &&
-      cached.name === deviceRef.current &&
-      cached.state === "connected"
-    ) {
-      return cached;
+  const send = useCallback((message: number[]) => {
+    const deviceId = deviceRef.current;
+    if (!deviceId) return;
+
+    const output = midiAccessRef.current?.outputs.get(deviceId);
+    if (!output || output.state !== "connected") return;
+
+    try {
+      output.send(message);
+    } catch (error) {
+      console.error("MIDI send failed:", error);
     }
-
-    const midiAccess = midiAccessRef.current;
-    if (!midiAccess) return undefined;
-
-    for (const output of midiAccess.outputs.values()) {
-      if (output.name === deviceRef.current) {
-        outputRef.current = output;
-        return output;
-      }
-    }
-
-    outputRef.current = null;
-    return undefined;
   }, []);
 
   const sendCC = useCallback(
@@ -142,9 +131,9 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
       const safeValue = toSafeMidiValue(value);
       if (safeChannel === null || safeCC === null || safeValue === null) return;
 
-      getOutput()?.send([0xb0 + safeChannel - 1, safeCC, safeValue]);
+      send([0xb0 + safeChannel - 1, safeCC, safeValue]);
     },
-    [getOutput],
+    [send],
   );
 
   const sendPC = useCallback(
@@ -153,12 +142,12 @@ const useMIDI = ({ onCC }: UseMIDIOptions = {}): UseMIDIReturn => {
       const safeProgram = toSafeMidiValue(program);
       if (safeChannel === null || safeProgram === null) return;
 
-      getOutput()?.send([0xc0 + safeChannel - 1, safeProgram]);
+      send([0xc0 + safeChannel - 1, safeProgram]);
     },
-    [getOutput],
+    [send],
   );
 
-  return { deviceList, device, setDevice, isMidiOutput, sendCC, sendPC };
+  return { status, deviceList, device, setDevice, sendCC, sendPC };
 };
 
 export default useMIDI;

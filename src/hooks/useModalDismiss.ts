@@ -1,4 +1,11 @@
-import { useEffect, type RefObject } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  type MouseEvent,
+  type PointerEvent,
+  type RefObject,
+} from "react";
 
 const FOCUSABLE_SELECTOR =
   'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])';
@@ -44,6 +51,23 @@ const useModalDismiss = (
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [cardRef, onClose]);
+
+  const pressStartedOnOverlay = useRef(false);
+
+  const onPointerDown = useCallback((event: PointerEvent<HTMLElement>) => {
+    pressStartedOnOverlay.current = event.target === event.currentTarget;
+  }, []);
+
+  const onClick = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      const startedOnOverlay = pressStartedOnOverlay.current;
+      pressStartedOnOverlay.current = false;
+      if (startedOnOverlay && event.target === event.currentTarget) onClose();
+    },
+    [onClose],
+  );
+
+  return { onPointerDown, onClick };
 };
 
 export default useModalDismiss;

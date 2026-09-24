@@ -127,7 +127,11 @@ export const parsePreset = (
   };
 };
 
-export const savePresetFile = async (preset: ParsedPreset) => {
+const DOWNLOAD_URL_TTL_MS = 10_000;
+
+export const savePresetFile = async (
+  preset: ParsedPreset,
+): Promise<boolean> => {
   const dataStr = JSON.stringify(
     {
       ...preset,
@@ -137,54 +141,45 @@ export const savePresetFile = async (preset: ParsedPreset) => {
     2,
   );
   const dataBlob = new Blob([dataStr], { type: "application/json" });
-  const suggestedName = preset.name.replace(/[^a-z0-9]/gi, "_");
+  const fileName = `${preset.name.replace(/[^a-z0-9]/gi, "_") || "preset"}.json`;
 
   if ("showSaveFilePicker" in window) {
     try {
       const handle = await window.showSaveFilePicker({
-        suggestedName: `${suggestedName}.json`,
+        suggestedName: fileName,
       });
       const writable = await handle.createWritable();
       await writable.write(dataBlob);
       await writable.close();
+      return true;
     } catch (error) {
-      if ((error as DOMException).name !== "AbortError") {
-        console.error("Save failed:", error);
-      }
+      if ((error as DOMException).name === "AbortError") return true;
+      console.error("Save failed:", error);
+      return false;
     }
-    return;
   }
 
   const url = URL.createObjectURL(dataBlob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${suggestedName}.json`;
+  link.download = fileName;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_TTL_MS);
+  return true;
 };
 
-export const readPresetFile = (
+export const readPresetFile = async (
   file: File,
   maxBlocks: number,
-): Promise<ParsePresetResult> =>
-  new Promise((resolve) => {
-    const reader = new FileReader();
-
-    reader.onload = (event: ProgressEvent<FileReader>) => {
-      const text = event.target?.result;
-      try {
-        resolve(parsePreset(typeof text === "string" ? text : "", maxBlocks));
-      } catch {
-        resolve({ ok: false, error: "invalid" });
-      }
-    };
-
-    reader.onerror = () => resolve({ ok: false, error: "invalid" });
-    reader.onabort = () => resolve({ ok: false, error: "invalid" });
-    reader.readAsText(file);
-  });
+): Promise<ParsePresetResult> => {
+  try {
+    return parsePreset(await file.text(), maxBlocks);
+  } catch {
+    return { ok: false, error: "invalid" };
+  }
+};
 
 export const getPresetLoadErrorMessage = (
   result: Extract<ParsePresetResult, { ok: false }>,
