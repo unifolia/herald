@@ -66,7 +66,7 @@ const PresetBrowser = ({
       .catch(() => setStatus("failed"));
   };
 
-  useModalDismiss(cardRef, closeRef, onClose);
+  const overlayProps = useModalDismiss(cardRef, closeRef, onClose);
 
   const brands = useMemo(
     () => (catalog ? Object.keys(catalog) : []),
@@ -95,12 +95,12 @@ const PresetBrowser = ({
 
   return createPortal(
     <ModalOverlay
-      onClick={onClose}
+      {...overlayProps}
       role="dialog"
       aria-modal="true"
       aria-labelledby="load-preset-title"
     >
-      <ModalCard ref={cardRef} onClick={(event) => event.stopPropagation()}>
+      <ModalCard ref={cardRef}>
         <ModalHeader>
           <ModalTitle id="load-preset-title">Load Preset</ModalTitle>
           <ModalCloseButton

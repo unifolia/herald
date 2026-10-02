@@ -38,16 +38,16 @@ const AdvancedModal = ({
     onClose();
   };
 
-  useModalDismiss(cardRef, closeRef, onClose);
+  const overlayProps = useModalDismiss(cardRef, closeRef, onClose);
 
   return createPortal(
     <ModalOverlay
-      onClick={onClose}
+      {...overlayProps}
       role="dialog"
       aria-modal="true"
       aria-labelledby="advanced-modal-title"
     >
-      <ModalCard ref={cardRef} onClick={(event) => event.stopPropagation()}>
+      <ModalCard ref={cardRef}>
         <ModalHeader>
           <ModalTitle id="advanced-modal-title">Advanced</ModalTitle>
           <ModalCloseButton

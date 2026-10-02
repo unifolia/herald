@@ -12,7 +12,7 @@ import { GlobalStyles, Title } from "./styles/GlobalStyles";
 import Navigation from "./lib/NavBar";
 import PresetBrowser from "./lib/PresetBrowser";
 import Device from "./lib/Device";
-import useMIDI from "./hooks/useMIDI";
+import useMIDI, { type MidiStatus } from "./hooks/useMIDI";
 import useDragReorder from "./hooks/useDragReorder";
 import usePresetBlocks from "./hooks/usePresetBlocks";
 import useModulation from "./hooks/useModulation";
@@ -29,6 +29,13 @@ import {
 import type { Layout, ColorScheme } from "./types";
 import { MAX_BLOCKS } from "./constants";
 
+const MIDI_STATUS_MESSAGES: Record<MidiStatus, string> = {
+  pending: "Waiting for MIDI Access…",
+  unsupported: "This Browser Doesn't Support Web MIDI",
+  blocked: "MIDI Access Is Blocked for This Site",
+  ready: "No MIDI Devices Connected",
+};
+
 const App = () => {
   const [colorScheme, setColorScheme] = useState<ColorScheme>(
     getInitialColorScheme,
@@ -42,7 +49,8 @@ const App = () => {
     forms,
     pcForms,
     formOrder,
-    globalMidiChannel,
+    sharedMidiChannel,
+    presetGeneration,
     allItems,
     allFormsById,
     handleIncomingCC,
@@ -53,15 +61,15 @@ const App = () => {
     updateCCFormField,
     updatePCFormField,
     updateCCValues,
-    randomizeCCValues,
     handleReorder,
     handleGlobalMidiChannelChange,
     setPresetName,
     setPresetState,
   } = usePresetBlocks(initialBackgroundColor, MAX_BLOCKS);
 
-  const { deviceList, device, setDevice, isMidiOutput, sendCC, sendPC } =
-    useMIDI({ onCC: handleIncomingCC });
+  const { status, deviceList, device, setDevice, sendCC, sendPC } = useMIDI({
+    onCC: handleIncomingCC,
+  });
 
   const {
     activeModulation,
@@ -72,7 +80,7 @@ const App = () => {
     ccForms: forms.inputs,
     sendCC,
     updateCCValues,
-    randomizeCCValues,
+    presetGeneration,
   });
 
   const toggleLayout = useCallback(
@@ -88,25 +96,18 @@ const App = () => {
     });
   }, []);
 
-  const {
-    orderedIds,
-    draggedId,
-    handlePointerDown,
-    moveItem,
-    registerRef,
-    containerRef,
-  } = useDragReorder(allItems, handleReorder);
+  const { orderedIds, draggedId, handlePointerDown, moveItem, registerRef } =
+    useDragReorder(allItems, handleReorder);
 
-  const savePreset = useCallback(
-    () =>
-      savePresetFile({
-        name: forms.name,
-        inputs: forms.inputs,
-        pcForms,
-        formOrder,
-      }),
-    [formOrder, forms.inputs, forms.name, pcForms],
-  );
+  const savePreset = useCallback(async () => {
+    const saved = await savePresetFile({
+      name: forms.name,
+      inputs: forms.inputs,
+      pcForms,
+      formOrder,
+    });
+    if (!saved) alert("Could not save preset file");
+  }, [formOrder, forms.inputs, forms.name, pcForms]);
 
   const handleLoadPreset = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
@@ -132,14 +133,14 @@ const App = () => {
         <main>
           <Title>Herald</Title>
 
-          {isMidiOutput ? (
+          {status === "ready" && deviceList.length > 0 ? (
             <Device
               device={device}
               deviceList={deviceList}
               setDevice={setDevice}
             />
           ) : (
-            <h2>No MIDI Devices Connected</h2>
+            <h2>{MIDI_STATUS_MESSAGES[status]}</h2>
           )}
 
           <Navigation
@@ -152,7 +153,7 @@ const App = () => {
             onToggleWave={handleToggleWave}
             isDriftActive={activeModulation === "drift"}
             onToggleDrift={handleToggleDrift}
-            globalMidiChannel={globalMidiChannel}
+            sharedMidiChannel={sharedMidiChannel}
             handleGlobalMidiChannelChange={handleGlobalMidiChannelChange}
             layout={layout}
             onToggleLayout={toggleLayout}
@@ -173,7 +174,7 @@ const App = () => {
 
           <Header name={forms.name} setName={setPresetName} />
 
-          <FormsContainer ref={containerRef} $layout={layout}>
+          <FormsContainer $layout={layout}>
             {orderedIds.map((id) => {
               const item = allFormsById.get(id);
               if (!item) return null;
@@ -181,7 +182,7 @@ const App = () => {
                 const form = item.data;
                 return (
                   <MidiCCForm
-                    key={form.id}
+                    key={`${presetGeneration}:${form.id}`}
                     id={form.id}
                     onRemove={handleRemoveCCForm}
                     updateCCFormField={updateCCFormField}
@@ -202,7 +203,7 @@ const App = () => {
               const pc = item.data;
               return (
                 <MidiPCForm
-                  key={pc.id}
+                  key={`${presetGeneration}:${pc.id}`}
                   id={pc.id}
                   onRemove={handleRemovePCForm}
                   updatePCFormField={updatePCFormField}

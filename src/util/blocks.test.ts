@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { MidiCCFormData } from "../types";
-import { applyCCValues, applyIncomingCC } from "./blocks";
+import {
+  applyCCValues,
+  applyIncomingCC,
+  getSharedMidiChannel,
+  reconcileOrder,
+  sortByOrder,
+} from "./blocks";
 
 const ccForm = (
   overrides: Partial<MidiCCFormData> & { id: number },
@@ -91,5 +97,58 @@ describe("applyCCValues", () => {
 
     expect(next.inputs[0]).toBe(prev.inputs[0]);
     expect(next.inputs[1].value).toBe(77);
+  });
+});
+
+describe("reconcileOrder", () => {
+  it("adopts the proposed order when it names exactly the current blocks", () => {
+    expect(reconcileOrder([1, 2, 3], [3, 1, 2])).toEqual([3, 1, 2]);
+  });
+
+  it("keeps a block the proposed order does not know about", () => {
+    expect(reconcileOrder([1, 2, 3, 4], [3, 1, 2])).toEqual([3, 1, 2, 4]);
+  });
+
+  it("drops ids that no longer exist and dedupes repeats", () => {
+    expect(reconcileOrder([1, 2], [2, 9, 2, 1])).toEqual([2, 1]);
+  });
+});
+
+describe("sortByOrder", () => {
+  it("sorts blocks into the given order", () => {
+    const blocks = [{ id: 1 }, { id: 2 }, { id: 3 }];
+
+    expect(sortByOrder(blocks, [3, 1, 2]).map((b) => b.id)).toEqual([3, 1, 2]);
+  });
+
+  it("never drops a block missing from the order", () => {
+    const blocks = [{ id: 1 }, { id: 2 }, { id: 3 }];
+
+    expect(sortByOrder(blocks, [2]).map((b) => b.id)).toEqual([2, 1, 3]);
+  });
+
+  it("does not mutate its input", () => {
+    const blocks = [{ id: 1 }, { id: 2 }];
+    sortByOrder(blocks, [2, 1]);
+
+    expect(blocks.map((b) => b.id)).toEqual([1, 2]);
+  });
+});
+
+describe("getSharedMidiChannel", () => {
+  it("returns the channel when every block shares it", () => {
+    expect(getSharedMidiChannel([{ midiChannel: 5 }, { midiChannel: 5 }])).toBe(
+      5,
+    );
+  });
+
+  it("returns null when blocks disagree", () => {
+    expect(
+      getSharedMidiChannel([{ midiChannel: 5 }, { midiChannel: 6 }]),
+    ).toBeNull();
+  });
+
+  it("returns null with no blocks", () => {
+    expect(getSharedMidiChannel([])).toBeNull();
   });
 });

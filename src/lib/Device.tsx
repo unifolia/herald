@@ -3,11 +3,12 @@ import {
   DeviceContainer,
   DeviceHeading,
 } from "../styles/components";
+import type { MidiPortOption } from "../util/midi";
 
 interface DeviceProps {
   device: string;
-  deviceList: string[];
-  setDevice: (deviceName: string) => void;
+  deviceList: MidiPortOption[];
+  setDevice: (deviceId: string) => void;
 }
 
 const Device = ({ device, deviceList, setDevice }: DeviceProps) => {
@@ -21,9 +22,9 @@ const Device = ({ device, deviceList, setDevice }: DeviceProps) => {
         onChange={(e) => setDevice(e.target.value)}
       >
         <option value="">Select Device...</option>
-        {deviceList.map((d) => (
-          <option key={d} value={d}>
-            {d}
+        {deviceList.map(({ id, label }) => (
+          <option key={id} value={id}>
+            {label}
           </option>
         ))}
       </DeviceSelect>

@@ -41,6 +41,21 @@ const getAnimationlessRect = (el: HTMLElement): LayoutRect => {
   }
 };
 
+const createDragGhost = (el: HTMLElement) => {
+  const ghost = el.cloneNode(true) as HTMLElement;
+
+  const sourceSelects = el.querySelectorAll("select");
+  ghost.querySelectorAll("select").forEach((select, index) => {
+    select.value = sourceSelects[index].value;
+  });
+
+  ghost.removeAttribute("id");
+  ghost.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"));
+  ghost.setAttribute("aria-hidden", "true");
+
+  return ghost;
+};
+
 const useDragReorder = (
   items: { id: number }[],
   onCommit: (orderedIds: number[]) => void,
@@ -59,7 +74,6 @@ const useDragReorder = (
   const prevRectsRef = useRef(new Map<number, DOMRect>());
   const dragLayoutRef = useRef<DragLayout | null>(null);
   const needsFlipRef = useRef(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const dragActiveRef = useRef(false);
   const cleanupRef = useRef<(() => void) | null>(null);
 
@@ -162,10 +176,7 @@ const useDragReorder = (
     if (!fn) {
       fn = (el: HTMLElement | null) => {
         if (el) itemElsRef.current.set(id, el);
-        else {
-          itemElsRef.current.delete(id);
-          refCacheRef.current.delete(id);
-        }
+        else itemElsRef.current.delete(id);
       };
       refCacheRef.current.set(id, fn);
     }
@@ -212,7 +223,7 @@ const useDragReorder = (
       dragActiveRef.current = true;
       invalidateDragLayout();
 
-      clone = el.cloneNode(true) as HTMLElement;
+      clone = createDragGhost(el);
       const currentRect = el.getBoundingClientRect();
       cloneBaseLeft = currentRect.left;
       cloneBaseTop = currentRect.top;
@@ -426,7 +437,6 @@ const useDragReorder = (
     handlePointerDown,
     moveItem,
     registerRef,
-    containerRef,
   };
 };
 

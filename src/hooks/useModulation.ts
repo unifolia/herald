@@ -12,6 +12,7 @@ import {
   getDriftStep,
   runModulationTick,
 } from "../util/modulation";
+import { MIDI_MAX_VALUE } from "../util/midi";
 
 type SendCC = (midiChannel: number, midiCC: number, value: number) => void;
 
@@ -19,14 +20,14 @@ interface UseModulationParams {
   ccForms: MidiCCFormData[];
   sendCC: SendCC;
   updateCCValues: (valuesById: Map<number, number>) => void;
-  randomizeCCValues: () => MidiCCFormData[];
+  presetGeneration: number;
 }
 
 const useModulation = ({
   ccForms,
   sendCC,
   updateCCValues,
-  randomizeCCValues,
+  presetGeneration,
 }: UseModulationParams) => {
   const [activeModulation, setActiveModulation] =
     useState<ModulationMode>(null);
@@ -49,27 +50,31 @@ const useModulation = ({
     driftConfigsRef.current.clear();
   }, []);
 
+  useEffect(() => {
+    clearModulationConfigs();
+  }, [presetGeneration, clearModulationConfigs]);
+
   const handleRandomizeCCValues = useCallback(() => {
     clearModulationConfigs();
     setActiveModulation(null);
-    const randomizedForms = randomizeCCValues();
-    randomizedForms.forEach((form) => {
-      sendCC(form.midiChannel, form.midiCC, form.value);
+
+    const valuesById = new Map<number, number>();
+    ccFormsRef.current.forEach((form) => {
+      const value = Math.floor(Math.random() * (MIDI_MAX_VALUE + 1));
+      valuesById.set(form.id, value);
+      sendCCRef.current(form.midiChannel, form.midiCC, value);
     });
-  }, [clearModulationConfigs, randomizeCCValues, sendCC]);
+    updateCCValues(valuesById);
+  }, [clearModulationConfigs, updateCCValues]);
 
   const handleToggleWave = useCallback(() => {
-    setActiveModulation((mode) => {
-      clearModulationConfigs();
-      return mode === "wave" ? null : "wave";
-    });
+    clearModulationConfigs();
+    setActiveModulation((mode) => (mode === "wave" ? null : "wave"));
   }, [clearModulationConfigs]);
 
   const handleToggleDrift = useCallback(() => {
-    setActiveModulation((mode) => {
-      clearModulationConfigs();
-      return mode === "drift" ? null : "drift";
-    });
+    clearModulationConfigs();
+    setActiveModulation((mode) => (mode === "drift" ? null : "drift"));
   }, [clearModulationConfigs]);
 
   useEffect(() => {

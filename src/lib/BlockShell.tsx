@@ -1,23 +1,16 @@
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import { HexColorPicker } from "react-colorful";
-import {
-  handleLabelClick,
-  handleLabelChange,
-  handleLabelBlur,
-  handleLabelKeyDown,
-} from "../util/labelHandler";
 import useColorPicker from "../hooks/useColorPicker";
 import { withAlpha } from "../util/color";
 import type { Layout } from "../types";
 import MidiSelect from "./MidiSelect";
+import EditableTitle from "./EditableTitle";
 import { CHANNEL_OPTIONS, MIDI_VALUE_OPTIONS } from "./midiOptions";
 import {
   MidiFormContainer,
   FormHeader,
   FormHeaderContent,
   DragHandleButton,
-  FormTitleDisplay,
-  FormTitleInput,
   RemoveButton,
   FormGroup,
   FormLabel,
@@ -71,7 +64,6 @@ const BlockShell = ({
   isDragging,
   children,
 }: BlockShellProps) => {
-  const [isEditing, setIsEditing] = useState(false);
   const { isPickerOpen, pickerRef, swatchRef, togglePicker } = useColorPicker();
 
   const handlePointerDown = useCallback(
@@ -79,6 +71,11 @@ const BlockShell = ({
       onDragPointerDown?.(e, id);
     },
     [onDragPointerDown, id],
+  );
+
+  const handleLabelChange = useCallback(
+    (next: string) => updateField(id, "label", next),
+    [updateField, id],
   );
 
   const handleChannelChange = useCallback(
@@ -125,38 +122,11 @@ const BlockShell = ({
             onPointerDown={handlePointerDown}
             onKeyDown={handleDragKeyDown}
           />
-          {isEditing ? (
-            <FormTitleInput
-              type="text"
-              value={label}
-              aria-label="Control block name"
-              onChange={(e) =>
-                handleLabelChange((v) => updateField(id, "label", v), e)
-              }
-              onBlur={() =>
-                handleLabelBlur(setIsEditing, label, (v) =>
-                  updateField(id, "label", v),
-                )
-              }
-              onKeyDown={(e) => handleLabelKeyDown(setIsEditing, e)}
-              autoFocus
-            />
-          ) : (
-            <FormTitleDisplay
-              role="button"
-              tabIndex={0}
-              onClick={() => handleLabelClick(setIsEditing)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleLabelClick(setIsEditing);
-                }
-              }}
-              aria-label={`${label} — click to rename`}
-            >
-              {label}
-            </FormTitleDisplay>
-          )}
+          <EditableTitle
+            value={label}
+            onChange={handleLabelChange}
+            inputLabel="Control block name"
+          />
         </FormHeaderContent>
         <RemoveButton
           data-placement="header"

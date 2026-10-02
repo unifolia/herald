@@ -1,7 +1,13 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { MidiCCFormData, MidiPCFormData } from "../types";
 import type { ParsedPreset } from "../util/presetIo";
-import { applyCCValues, applyIncomingCC } from "../util/blocks";
+import {
+  applyCCValues,
+  applyIncomingCC,
+  getSharedMidiChannel,
+  reconcileOrder,
+  sortByOrder,
+} from "../util/blocks";
 
 const INITIAL_CC_ID = 1;
 const INITIAL_PC_ID = -1;
@@ -43,13 +49,16 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     INITIAL_CC_ID,
     INITIAL_PC_ID,
   ]);
-  const [globalMidiChannel, setGlobalMidiChannel] = useState<number | null>(
-    null,
-  );
+  const [presetGeneration, setPresetGeneration] = useState(0);
   const nextIdRef = useRef(INITIAL_CC_ID + 1);
   const nextPcIdRef = useRef(INITIAL_PC_ID - 1);
 
   const blockCount = forms.inputs.length + pcForms.length;
+
+  const sharedMidiChannel = useMemo(
+    () => getSharedMidiChannel([...forms.inputs, ...pcForms]),
+    [forms.inputs, pcForms],
+  );
 
   const allItems = useMemo(() => formOrder.map((id) => ({ id })), [formOrder]);
 
@@ -72,27 +81,16 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
   );
 
   const handleReorder = useCallback((reorderedIds: number[]) => {
-    setFormOrder(reorderedIds);
-    setForms((prev) => {
-      const byId = new Map(prev.inputs.map((form) => [form.id, form]));
-      return {
-        ...prev,
-        inputs: reorderedIds
-          .map((id) => byId.get(id))
-          .filter((form): form is MidiCCFormData => form !== undefined),
-      };
-    });
-    setPcForms((prev) => {
-      const byId = new Map(prev.map((form) => [form.id, form]));
-      return reorderedIds
-        .map((id) => byId.get(id))
-        .filter((form): form is MidiPCFormData => form !== undefined);
-    });
+    setFormOrder((prev) => reconcileOrder(prev, reorderedIds));
+    setForms((prev) => ({
+      ...prev,
+      inputs: sortByOrder(prev.inputs, reorderedIds),
+    }));
+    setPcForms((prev) => sortByOrder(prev, reorderedIds));
   }, []);
 
   const handleGlobalMidiChannelChange = useCallback(
     (newGlobalChannel: number) => {
-      setGlobalMidiChannel(newGlobalChannel);
       setForms((prev) => ({
         ...prev,
         inputs: prev.inputs.map((form) => ({
@@ -200,20 +198,6 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     setForms((prev) => applyCCValues(prev, valuesById));
   }, []);
 
-  const randomizeCCValues = useCallback(() => {
-    const randomizedInputs = forms.inputs.map((form) => ({
-      ...form,
-      value: Math.floor(Math.random() * 128),
-    }));
-
-    setForms((prev) => ({
-      ...prev,
-      inputs: randomizedInputs,
-    }));
-
-    return randomizedInputs;
-  }, [forms.inputs]);
-
   const setPresetName = useCallback((name: string) => {
     setForms((prev) => ({ ...prev, name }));
   }, []);
@@ -222,6 +206,7 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     setForms({ name: preset.name, inputs: preset.inputs });
     setPcForms(preset.pcForms);
     setFormOrder(preset.formOrder);
+    setPresetGeneration((generation) => generation + 1);
 
     const allIds = [
       ...preset.inputs.map((form) => form.id),
@@ -235,8 +220,8 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     forms,
     pcForms,
     formOrder,
-    globalMidiChannel,
-    blockCount,
+    sharedMidiChannel,
+    presetGeneration,
     allItems,
     allFormsById,
     handleIncomingCC,
@@ -247,7 +232,6 @@ const usePresetBlocks = (initialBackgroundColor: string, maxBlocks: number) => {
     updateCCFormField,
     updatePCFormField,
     updateCCValues,
-    randomizeCCValues,
     handleReorder,
     handleGlobalMidiChannelChange,
     setPresetName,

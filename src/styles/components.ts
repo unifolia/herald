@@ -1108,6 +1108,11 @@ export const ModalUploadButton = styled(NavButton).attrs({ as: "label" })`
     left: 0;
     cursor: pointer;
   }
+
+  &:has(input:focus-visible) {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
 `;
 
 export const ModalActions = styled.div`
