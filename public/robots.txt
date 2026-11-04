@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://midi.engineering/herald/sitemap.xml
+Sitemap: https://bellcast.engineering/herald/sitemap.xml

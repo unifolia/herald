@@ -236,8 +236,8 @@ const App = () => {
               </ThemeToggleButton>
             </FooterText>
             <FooterText>
-              <a id="mothership" href="https://midi.engineering">
-                𐙦 MIDI Engineering
+              <a id="mothership" href="https://bellcast.engineering/">
+                𐙦 Bellcast Engineering
               </a>
             </FooterText>
           </footer>

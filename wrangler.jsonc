@@ -1,0 +1,16 @@
+// Herald is served from bellcast.engineering/herald/ as Cloudflare Workers static assets (no Worker code).
+// The routes below run this Worker in front of the bellcast-engineering site Worker for those paths only.
+// Workers static assets serve a route's path from the matching folder, so `npm run build:cloudflare` builds into
+// dist-cloudflare/herald/ (the plain `npm run build` still outputs to dist/ at the root).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "herald",
+  "compatibility_date": "2026-11-04",
+  "routes": [
+    { "pattern": "bellcast.engineering/herald", "zone_name": "bellcast.engineering" },
+    { "pattern": "bellcast.engineering/herald/*", "zone_name": "bellcast.engineering" }
+  ],
+  "assets": {
+    "directory": "./dist-cloudflare"
+  }
+}
